@@ -13,7 +13,7 @@ class Application @Inject()(cc: ControllerComponents) extends AbstractController
 
   def newTask = TODO
 
-  def updateTask(id: Long) = TODO
+  def updateTask(id: Int) = TODO
 
-  def deleteTask(id: Long) = TODO
+  def deleteTask(id: Int) = TODO
 }

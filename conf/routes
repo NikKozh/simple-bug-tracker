@@ -6,8 +6,8 @@
 # Home page
 GET     /                           controllers.Application.index
 POST    /                           controllers.Application.newTask
-POST    /:id/update                 controllers.Application.updateTask(id: Long)
-POST    /:id/delete                 controllers.Application.deleteTask(id: Long)
+POST    /:id/update                 controllers.Application.updateTask(id: Int)
+POST    /:id/delete                 controllers.Application.deleteTask(id: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
