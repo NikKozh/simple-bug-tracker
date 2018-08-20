@@ -1,0 +1,112 @@
+@()
+
+@main("Simple bug tracker") {
+
+  <div class="wrapper">
+
+    <div id="sidebar">
+      <div class="card">
+        <h2>Создать задачу</h2>
+        <form id="createTask">
+          <label>
+            Название: <input class="title" type="text"/>
+          </label>
+
+          <br>
+          <br>
+
+          <div class="left-info">
+            <label>
+              Описание:
+              <br>
+              <textarea rows="10" cols="50"></textarea>
+            </label>
+          </div>
+          <div class="right-info">
+            <p>Состояние:</p>
+            <p><label><input name="state" type="radio" value="TODO" checked>TODO</label></p>
+            <p><label><input name="state" type="radio" value="inProgress">In Progress</label></p>
+            <p><label><input name="state" type="radio" value="done">Done</label></p>
+          </div>
+
+          <br>
+          <br>
+
+          <p><input type="submit" value="Отправить"/></p>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Редактировать задачу</h2>
+        <form id="editTask">
+          <label>
+            Название: <input class="title" type="text" disabled/>
+          </label>
+
+          <br>
+          <br>
+
+          <div class="left-info">
+            <label>
+              Описание:
+              <br>
+              <textarea rows="10" cols="50" disabled></textarea>
+            </label>
+          </div>
+          <div class="right-info">
+            <p>Состояние:</p>
+            <p><label><input name="state" type="radio" value="TODO" disabled>TODO</label></p>
+            <p><label><input name="state" type="radio" value="inProgress" disabled>In Progress</label></p>
+            <p><label><input name="state" type="radio" value="done" disabled>Done</label></p>
+          </div>
+
+          <br>
+          <br>
+
+          <p><input type="submit" value="Отправить" disabled/></p>
+        </form>
+
+        <br>
+        <p><a href="/">Перейти к полнотекстовому поиску по задачам</a></p>
+      </div>
+    </div>
+
+    <div id="content">
+      <table id="bugsTable">
+        <caption><h1>СПИСОК ЗАДАЧ</h1></caption>
+        <tr>
+          <th>TODO</th>
+          <th>In Progress</th>
+          <th>Done</th>
+        </tr>
+        <tr>
+          <td><a href="/">Задача 1</a></td>
+          <td><a href="/">Задача 2</a></td>
+          <td><a href="/">Задача 3</a></td>
+        </tr>
+        <tr>
+          <td><a href="/">Задача 4</a></td>
+          <td><a href="/">Задача 5</a></td>
+          <td><a href="/">Задача 6</a></td>
+        </tr>
+        <tr>
+          <td><a href="/">Задача 7</a></td>
+          <td><a href="/">Задача 8</a></td>
+          <td><a href="/">Задача 9</a></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><a href="/">Задача 10</a></td>
+          <td><a href="/">Задача 11</a></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td><a href="/">Задача 12</a></td>
+          <td></td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+}
