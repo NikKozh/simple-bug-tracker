@@ -117,7 +117,7 @@
         <caption><h1>СПИСОК ЗАДАЧ</h1></caption>
         <tr>
           @for(state <- TaskState.values) {
-            <th>@TaskState.toStr(state)</th>
+            <th>@state.toString</th>
           }
         </tr>
 

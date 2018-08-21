@@ -3,12 +3,9 @@ package models
 object TaskState extends Enumeration {
   type TaskState = Value
   // перечислять состояния нужно именно в том порядке, в котором столбцы таблицы будут рендериться в шаблоне:
-  val  TODO, IN_PROGRESS, DONE = Value
-
-  // TODO: переопределить toString() у Value
-  def toStr(value: Value): String = {
-    value.toString.head + value.toString.replace("_", " ").tail.toLowerCase
-  }
+  val TODO        = Value("TODO")
+  val IN_PROGRESS = Value("In Progress")
+  val DONE        = Value("Done")
 }
 
 import models.TaskState._
