@@ -27,6 +27,7 @@ object Task {
     // TODO: если будет время, замерить время выполнения с view и без
     val sortedTasksMatrix = getTasks.view.groupBy(_.state).values.toList.reverse
     val maxRowLength = sortedTasksMatrix.view.map(_.size).max
+    // TODO: заменить null на Option(None)
     sortedTasksMatrix.map(_.padTo(maxRowLength, null)).transpose
   }
 

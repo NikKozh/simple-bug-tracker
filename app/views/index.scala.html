@@ -1,4 +1,8 @@
-@(tasks: List[List[Task]], form: Form[TaskForm])
+@(tasksMatrix: List[List[Task]], form: Form[TaskForm])(implicit id: Option[Int])
+
+@{
+
+}
 
 @main("Simple bug tracker") {
 
@@ -17,7 +21,7 @@
 
           <div class="left-info">
             <label>
-              Описание:
+              Описание @id.getOrElse(""):
               <br>
               <textarea rows="10" cols="50"></textarea>
             </label>
@@ -81,7 +85,21 @@
           }
         </tr>
 
-        @*for(task <- tasks) {
+        @for(tasksRow <- tasksMatrix) {
+          <tr>
+            @for(task <- tasksRow) {
+              <td>
+                @if(task != null) {
+                  <a href="@routes.Application.index(Some(task.id))">
+                  @task.title
+                  </a>
+                }
+              </td>
+            }
+          </tr>
+        }
+
+        @*for(task <- tasksMatrix) {
 
           <tr>
           @{task.state match {

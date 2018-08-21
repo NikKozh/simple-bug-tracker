@@ -19,7 +19,7 @@ class Application @Inject()(cc: MessagesControllerComponents) extends MessagesAb
     )(TaskForm.apply)(TaskForm.unapply)
   }
 
-  def index() = Action { implicit request: Request[AnyContent] =>
+  def index(implicit id: Option[Int]) = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))
   }
 
