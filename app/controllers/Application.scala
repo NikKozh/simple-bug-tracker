@@ -10,12 +10,15 @@ class Application @Inject()(cc: MessagesControllerComponents) extends MessagesAb
   import TaskForm._
 
   def index(implicit id: Option[Int]) = Action { implicit request: MessagesRequest[AnyContent] =>
-    Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))
+    Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm, id))
   }
 
   def createTask = TODO
 
   def updateTask(id: Int) = TODO
 
-  def deleteTask(id: Int) = TODO
+  def deleteTask(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+    Task.delete(id)
+    Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))
+  }
 }

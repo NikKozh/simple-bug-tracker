@@ -1,4 +1,4 @@
-@(tasksMatrix: List[List[Task]], form: Form[TaskForm.Data])(implicit request: MessagesRequestHeader, id: Option[Int])
+@(tasksMatrix: List[List[Task]], form: Form[TaskForm.Data], id: Option[Int] = None)(implicit request: MessagesRequestHeader)
 
 @main("Simple bug tracker") {
 
@@ -7,7 +7,7 @@
     <div id="sidebar">
       <div class="card">
         <h2>Создать задачу</h2>
-        <form action="@routes.Application.createTask()" method="post">
+        <form action="@helper.CSRF(routes.Application.createTask())" method="post">
           <label>
             Название: <input name="title" type="text" required/>
           </label>
@@ -73,7 +73,7 @@
 
                 <input type="submit" value="Редактировать"/>
               </form>
-              <form action="@routes.Application.deleteTask(id.get)" method="post">
+              <form action="@helper.CSRF(routes.Application.deleteTask(id.get))" method="post">
                 <input type="submit" value="Удалить"/>
               </form>
             }
