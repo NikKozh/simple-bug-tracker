@@ -12,11 +12,18 @@ import controllers.TaskForm.Data
 import models.TaskState._
 
 // case class Task(id: Int, title: String, description: String, state: TaskState)
-// Временное решение:
-case class Task(id: Int, var title: String, var description: String, var state: TaskState)
+// Временное решение с mutable полями:
+case class Task(var id: Int, var title: String, var description: String, var state: TaskState)
 
 object Task {
   import scala.collection.mutable._
+
+  // Временное решение, автоинкремент будет в БД
+  private var counter = 7
+  private def increment = {
+    counter += 1
+    counter
+  }
 
   var list = new ListBuffer[Task]()
   list ++= List[Task](Task(1, "title1", "desc1", TODO),        Task(2, "title2", "desc2", DONE),
@@ -49,7 +56,9 @@ object Task {
     }
   }
 
-  def create(title: String, description: String, state: TaskState) {}
+  def create(data: Data): Unit = {
+    list += Task(increment, data.title, data.description, data.state)
+  }
 
   def delete(id: Int):Unit = {
     list = list.filterNot(task => task.id == id)
