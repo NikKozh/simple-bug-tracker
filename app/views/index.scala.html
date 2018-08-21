@@ -32,7 +32,7 @@
           <br>
           <br>
 
-          <p><input type="submit" value="Отправить"/></p>
+          <p><input type="submit" value="Создать"/></p>
         </form>
       </div>
 
@@ -71,7 +71,10 @@
                 <br>
                 <br>
 
-                <p><input type="submit" value="Отправить"/></p>
+                <input type="submit" value="Редактировать"/>
+              </form>
+              <form action="@routes.Application.deleteTask(id.get)" method="post">
+                <input type="submit" value="Удалить"/>
               </form>
             }
           }
@@ -102,7 +105,10 @@
             <br>
             <br>
 
-            <p><input type="submit" value="Отправить" disabled/></p>
+            <input type="submit" value="Редактировать" disabled/>
+          </form>
+          <form>
+            <input type="submit" value="Удалить" disabled/>
           </form>
         }
 
