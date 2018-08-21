@@ -73,11 +73,12 @@
 
     <div id="content">
       <table id="bugsTable">
+        @{import TaskState._}
         <caption><h1>СПИСОК ЗАДАЧ</h1></caption>
         <tr>
-          <th>TODO</th>
-          <th>In Progress</th>
-          <th>Done</th>
+          @for(state <- TaskState.values) {
+            <th>@TaskState.toStr(state)</th>
+          }
         </tr>
 
         @*for(task <- tasks) {

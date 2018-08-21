@@ -20,7 +20,7 @@ class Application @Inject()(cc: MessagesControllerComponents) extends MessagesAb
   }
 
   def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(views.html.index(Task.getTasks, taskForm))
+    Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))
   }
 
   def newTask = TODO

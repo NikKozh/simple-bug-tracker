@@ -4,6 +4,11 @@ object TaskState extends Enumeration {
   type TaskState = Value
   // перечислять состояния нужно именно в том порядке, в котором столбцы таблицы будут рендериться в шаблоне:
   val  TODO, IN_PROGRESS, DONE = Value
+
+  // TODO: переопределить toString() у Value
+  def toStr(value: Value): String = {
+    value.toString.head + value.toString.replace("_", " ").tail.toLowerCase
+  }
 }
 
 import models.TaskState._
@@ -11,7 +16,11 @@ import models.TaskState._
 case class Task(id: Int, title: String, description: String, state: TaskState)
 
 object Task {
-  def getTasks: List[Task] = Task(1, "title", "desc", TODO) :: Nil // TODO: временное решение до реализации доступа к БД
+  // TODO: временное решение до реализации доступа к БД
+  def getTasks: List[Task] = Task(1, "title1", "desc1", TODO) :: Task(2, "title2", "desc2", DONE) ::
+                             Task(3, "title3", "desc3", TODO) :: Task(4, "title3", "desc3", TODO) ::
+                             Task(5, "title5", "desc5", IN_PROGRESS) :: Task(6, "title6", "desc6", IN_PROGRESS) ::
+                             Task(7, "title1", "desc1", TODO) :: Nil
 
   // Генерирует из списка задач матрицу, полностью совпадающую со структурой таблицы в шаблоне:
   def getTasksMatrixForTemplate: List[List[Task]] = {
