@@ -1,4 +1,4 @@
-@(tasks: List[Task], form: Form[TaskForm])
+@(tasks: List[List[Task]], form: Form[TaskForm])
 
 @main("Simple bug tracker") {
 
@@ -79,7 +79,8 @@
           <th>In Progress</th>
           <th>Done</th>
         </tr>
-        @for(task <- tasks) {
+
+        @*for(task <- tasks) {
 
           <tr>
           @{task.state match {
@@ -89,7 +90,8 @@
               <td></td>
           }}
           </tr>
-        }
+        }*@
+
         @*<tr>
           <td><a href="/">Задача 1</a></td>
           <td><a href="/">Задача 2</a></td>
