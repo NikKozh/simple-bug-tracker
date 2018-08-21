@@ -1,9 +1,9 @@
 package controllers
 
 import javax.inject._
-import play.api._
 import play.api.mvc._
 import models.Task
+import play.api.data.Form
 
 @Singleton
 class Application @Inject()(cc: MessagesControllerComponents) extends MessagesAbstractController(cc) {
@@ -15,10 +15,26 @@ class Application @Inject()(cc: MessagesControllerComponents) extends MessagesAb
 
   def createTask = TODO
 
-  def updateTask(id: Int) = TODO
+  def updateTask(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
+    /*Task.update(id)
+    Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))*/
+
+    val errorFunction = { formWithErrors: Form[Data] =>
+      BadRequest(views.html.index(Task.getTasksMatrixForTemplate, formWithErrors))
+    }
+
+    val successFunction = { data: Data =>
+      Task.update(id, data)
+      Redirect(routes.Application.index(None))/*.flashing("info" -> "Task added!")*/
+    }
+
+    val formValidationResult = taskForm.bindFromRequest
+    formValidationResult.fold(errorFunction, successFunction)
+  }
 
   def deleteTask(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
     Task.delete(id)
-    Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))
+    // Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))
+    Redirect(routes.Application.index(None))
   }
 }

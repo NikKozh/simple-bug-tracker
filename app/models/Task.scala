@@ -8,9 +8,12 @@ object TaskState extends Enumeration {
   val DONE        = Value("Done")
 }
 
+import controllers.TaskForm.Data
 import models.TaskState._
 
-case class Task(id: Int, title: String, description: String, state: TaskState)
+// case class Task(id: Int, title: String, description: String, state: TaskState)
+// Временное решение:
+case class Task(id: Int, var title: String, var description: String, var state: TaskState)
 
 object Task {
   import scala.collection.mutable._
@@ -49,9 +52,18 @@ object Task {
   def create(title: String, description: String, state: TaskState) {}
 
   def delete(id: Int):Unit = {
-    // list -= Task(id, _, _, _)
     list = list.filterNot(task => task.id == id)
   }
 
-  def update(id: Int) {}
+  def update(id: Int, data: Data):Unit = {
+    // Нет смысла писать что-то более красивое\оптимизированное,
+    // т.к. в дальнейшем всё равно будет взаимодействие с БД
+    for (task <- list) {
+      if (task.id == id) {
+        task.title = data.title
+        task.description = data.description
+        task.state = data.state
+      }
+    }
+  }
 }

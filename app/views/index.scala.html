@@ -19,14 +19,14 @@
             <label>
               Описание:
               <br>
-              <textarea name="description" rows="10" cols="50" required></textarea>
+              <textarea name="description" rows="10" cols="50"></textarea>
             </label>
           </div>
           <div class="right-info">
             <p>Состояние:</p>
             <p><label><input name="state" type="radio" value="TODO" checked>TODO</label></p>
-            <p><label><input name="state" type="radio" value="inProgress">In Progress</label></p>
-            <p><label><input name="state" type="radio" value="done">Done</label></p>
+            <p><label><input name="state" type="radio" value="In Progress">In Progress</label></p>
+            <p><label><input name="state" type="radio" value="Done">Done</label></p>
           </div>
 
           <br>
@@ -44,10 +44,10 @@
           @defining(Task.getTask(id.get)) { editableTask =>
             @if(editableTask.isDefined ) {
 
-              <form action="@routes.Application.updateTask(id.get)" method="post">
+              <form action="@helper.CSRF(routes.Application.updateTask(id.get))" method="post">
                 <label>
                   Название:
-                  <input name="title" type="text" value="@editableTask.get.title"/>
+                  <input name="title" type="text" value="@editableTask.get.title" required/>
                 </label>
 
                 <br>
@@ -64,8 +64,8 @@
                   <p>Состояние:</p>
 
                   <p><label><input name="state" type="radio" value="TODO" @{if (editableTask.get.state == TaskState.TODO) "checked"}>TODO</label></p>
-                  <p><label><input name="state" type="radio" value="inProgress" @{if (editableTask.get.state == TaskState.IN_PROGRESS) "checked"}>In Progress</label></p>
-                  <p><label><input name="state" type="radio" value="done" @{if (editableTask.get.state == TaskState.DONE) "checked"}>Done</label></p>
+                  <p><label><input name="state" type="radio" value="In Progress" @{if (editableTask.get.state == TaskState.IN_PROGRESS) "checked"}>In Progress</label></p>
+                  <p><label><input name="state" type="radio" value="Done" @{if (editableTask.get.state == TaskState.DONE) "checked"}>Done</label></p>
                 </div>
 
                 <br>
@@ -98,8 +98,8 @@
             <div class="right-info">
               <p>Состояние:</p>
               <p><label><input name="state" type="radio" value="TODO" disabled>TODO</label></p>
-              <p><label><input name="state" type="radio" value="inProgress" disabled>In Progress</label></p>
-              <p><label><input name="state" type="radio" value="done" disabled>Done</label></p>
+              <p><label><input name="state" type="radio" value="In Progress" disabled>In Progress</label></p>
+              <p><label><input name="state" type="radio" value="Done" disabled>Done</label></p>
             </div>
 
             <br>
