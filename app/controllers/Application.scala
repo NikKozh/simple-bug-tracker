@@ -4,17 +4,16 @@ import javax.inject._
 import play.api._
 import play.api.mvc._
 import models.Task
-import views.html.helper.form
 
 @Singleton
 class Application @Inject()(cc: MessagesControllerComponents) extends MessagesAbstractController(cc) {
   import TaskForm._
 
-  def index(implicit id: Option[Int]) = Action { implicit request: Request[AnyContent] =>
+  def index(implicit id: Option[Int]) = Action { implicit request: MessagesRequest[AnyContent] =>
     Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))
   }
 
-  def newTask = TODO
+  def createTask = TODO
 
   def updateTask(id: Int) = TODO
 

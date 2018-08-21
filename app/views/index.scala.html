@@ -1,4 +1,4 @@
-@(tasksMatrix: List[List[Task]], form: Form[TaskForm.Data])(implicit id: Option[Int])
+@(tasksMatrix: List[List[Task]], form: Form[TaskForm.Data])(implicit request: MessagesRequestHeader, id: Option[Int])
 
 @main("Simple bug tracker") {
 
@@ -7,9 +7,9 @@
     <div id="sidebar">
       <div class="card">
         <h2>Создать задачу</h2>
-        <form id="createTask">
+        <form action="@routes.Application.createTask()" method="post">
           <label>
-            Название: <input class="title" type="text"/>
+            Название: <input name="title" type="text" required/>
           </label>
 
           <br>
@@ -19,7 +19,7 @@
             <label>
               Описание:
               <br>
-              <textarea rows="10" cols="50"></textarea>
+              <textarea name="description" rows="10" cols="50" required></textarea>
             </label>
           </div>
           <div class="right-info">
@@ -39,36 +39,72 @@
       <div class="card">
         <h2>Редактировать задачу</h2>
 
+        @* TODO: посмотреть на наличие дублирующегося кода, мб переделать условие *@
+        @if(id.isDefined) {
+          @defining(Task.getTask(id.get)) { editableTask =>
+            @if(editableTask.isDefined ) {
 
+              <form action="@routes.Application.updateTask(id.get)" method="post">
+                <label>
+                  Название:
+                  <input name="title" type="text" value="@editableTask.get.title"/>
+                </label>
 
-        <form id="editTask">
-          <label>
-            Название:
-            <input class="title" type="text" disabled/>
-          </label>
+                <br>
+                <br>
 
-          <br>
-          <br>
+                <div class="left-info">
+                  <label>
+                    Описание:
+                    <br>
+                    <textarea name="description" rows="10" cols="50">@editableTask.get.description</textarea>
+                  </label>
+                </div>
+                <div class="right-info">
+                  <p>Состояние:</p>
 
-          <div class="left-info">
+                  <p><label><input name="state" type="radio" value="TODO" @{if (editableTask.get.state == TaskState.TODO) "checked"}>TODO</label></p>
+                  <p><label><input name="state" type="radio" value="inProgress" @{if (editableTask.get.state == TaskState.IN_PROGRESS) "checked"}>In Progress</label></p>
+                  <p><label><input name="state" type="radio" value="done" @{if (editableTask.get.state == TaskState.DONE) "checked"}>Done</label></p>
+                </div>
+
+                <br>
+                <br>
+
+                <p><input type="submit" value="Отправить"/></p>
+              </form>
+            }
+          }
+        } else {
+          <form id="editTask">
             <label>
-              Описание:
-              <br>
-              <textarea rows="10" cols="50" disabled></textarea>
+              Название:
+              <input class="title" type="text" disabled/>
             </label>
-          </div>
-          <div class="right-info">
-            <p>Состояние:</p>
-            <p><label><input name="state" type="radio" value="TODO" disabled>TODO</label></p>
-            <p><label><input name="state" type="radio" value="inProgress" disabled>In Progress</label></p>
-            <p><label><input name="state" type="radio" value="done" disabled>Done</label></p>
-          </div>
 
-          <br>
-          <br>
+            <br>
+            <br>
 
-          <p><input type="submit" value="Отправить" disabled/></p>
-        </form>
+            <div class="left-info">
+              <label>
+                Описание:
+                <br>
+                <textarea rows="10" cols="50" disabled></textarea>
+              </label>
+            </div>
+            <div class="right-info">
+              <p>Состояние:</p>
+              <p><label><input name="state" type="radio" value="TODO" disabled>TODO</label></p>
+              <p><label><input name="state" type="radio" value="inProgress" disabled>In Progress</label></p>
+              <p><label><input name="state" type="radio" value="done" disabled>Done</label></p>
+            </div>
+
+            <br>
+            <br>
+
+            <p><input type="submit" value="Отправить" disabled/></p>
+          </form>
+        }
 
         <br>
         <p><a href="/">Перейти к полнотекстовому поиску по задачам</a></p>

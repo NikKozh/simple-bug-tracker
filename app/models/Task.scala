@@ -28,6 +28,7 @@ object Task {
   }
 
   // Генерирует из списка задач матрицу, полностью совпадающую со структурой таблицы в шаблоне:
+  // TODO: не забыть проверить на "крайние" случаи
   def getTasksMatrixForTemplate: List[List[Task]] = {
     // TODO: если будет время, замерить время выполнения с view и без
     val sortedTasksMatrix = getTasks.view.groupBy(_.state).values.toList.reverse
