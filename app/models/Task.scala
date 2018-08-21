@@ -2,7 +2,7 @@ package models
 
 object TaskState extends Enumeration {
   type TaskState = Value
-  // перечислять состояния нужно именно в том порядке, в котором столбцы таблицы будут рендериться в шаблоне:
+  // столбцы будут рендериться в шаблоне согласно порядку перечисления:
   val TODO        = Value("TODO")
   val IN_PROGRESS = Value("In Progress")
   val DONE        = Value("Done")
@@ -28,7 +28,8 @@ object Task {
   // TODO: не забыть проверить на "крайние" случаи
   def getTasksMatrixForTemplate: List[List[Task]] = {
     // TODO: если будет время, замерить время выполнения с view и без
-    val sortedTasksMatrix = getTasks.view.groupBy(_.state).values.toList.reverse
+    // TODO: желательно заменить конструкцию toMap -> values -> toList чем-то покороче
+    val sortedTasksMatrix = getTasks.view.groupBy(_.state.id).toSeq.sortBy(_._1).toMap.values.toList
     val maxRowLength = sortedTasksMatrix.view.map(_.size).max
     // TODO: заменить null на Option(None)
     sortedTasksMatrix.map(_.padTo(maxRowLength, null)).transpose
