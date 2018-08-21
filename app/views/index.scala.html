@@ -1,8 +1,4 @@
-@(tasksMatrix: List[List[Task]], form: Form[TaskForm])(implicit id: Option[Int])
-
-@{
-
-}
+@(tasksMatrix: List[List[Task]], form: Form[TaskForm.Data])(implicit id: Option[Int])
 
 @main("Simple bug tracker") {
 
@@ -21,7 +17,7 @@
 
           <div class="left-info">
             <label>
-              Описание @id.getOrElse(""):
+              Описание:
               <br>
               <textarea rows="10" cols="50"></textarea>
             </label>
@@ -42,9 +38,13 @@
 
       <div class="card">
         <h2>Редактировать задачу</h2>
+
+
+
         <form id="editTask">
           <label>
-            Название: <input class="title" type="text" disabled/>
+            Название:
+            <input class="title" type="text" disabled/>
           </label>
 
           <br>
@@ -98,44 +98,6 @@
             }
           </tr>
         }
-
-        @*for(task <- tasksMatrix) {
-
-          <tr>
-          @{task.state match {
-            case TaskState.TODO =>
-              <td><a href="/">Задача {task.id}</a></td>
-              <td></td>
-              <td></td>
-          }}
-          </tr>
-        }*@
-
-        @*<tr>
-          <td><a href="/">Задача 1</a></td>
-          <td><a href="/">Задача 2</a></td>
-          <td><a href="/">Задача 3</a></td>
-        </tr>
-        <tr>
-          <td><a href="/">Задача 4</a></td>
-          <td><a href="/">Задача 5</a></td>
-          <td><a href="/">Задача 6</a></td>
-        </tr>
-        <tr>
-          <td><a href="/">Задача 7</a></td>
-          <td><a href="/">Задача 8</a></td>
-          <td><a href="/">Задача 9</a></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td><a href="/">Задача 10</a></td>
-          <td><a href="/">Задача 11</a></td>
-        </tr>
-        <tr>
-          <td></td>
-          <td><a href="/">Задача 12</a></td>
-          <td></td>
-        </tr>*@
       </table>
     </div>
 

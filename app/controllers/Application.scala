@@ -1,23 +1,14 @@
 package controllers
 
 import javax.inject._
-import models.Task
 import play.api._
 import play.api.mvc._
-import play.api.data.Form
-import play.api.data.Forms._
-
-import models.TaskState.TaskState
+import models.Task
+import views.html.helper.form
 
 @Singleton
 class Application @Inject()(cc: MessagesControllerComponents) extends MessagesAbstractController(cc) {
-
-  val taskForm: Form[TaskForm] = Form {
-    mapping(
-      "title" -> nonEmptyText,
-      "description" -> text
-    )(TaskForm.apply)(TaskForm.unapply)
-  }
+  import TaskForm._
 
   def index(implicit id: Option[Int]) = Action { implicit request: Request[AnyContent] =>
     Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))
@@ -29,6 +20,3 @@ class Application @Inject()(cc: MessagesControllerComponents) extends MessagesAb
 
   def deleteTask(id: Int) = TODO
 }
-
-// TODO: добавить в атрибуты состояние и разобраться, как его обрабатывать
-case class TaskForm(title: String, description: String/*, state: TaskState*/)
