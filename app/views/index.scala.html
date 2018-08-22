@@ -1,4 +1,7 @@
-@(tasksMatrix: List[List[Task]], form: Form[TaskForm.Data], id: Option[Int] = None)(implicit request: MessagesRequestHeader)
+@import scala.concurrent.Future
+@import scala.concurrent.{ExecutionContext, Await}
+@import scala.concurrent.duration.Duration
+@(futureTasksMatrix: Future[List[List[Task]]], form: Form[TaskForm.Data], id: Option[Int] = None)(implicit request: MessagesRequestHeader, ec: ExecutionContext)
 
 @main("Simple bug tracker") {
 
@@ -127,19 +130,21 @@
           }
         </tr>
 
-        @for(tasksRow <- tasksMatrix) {
-          <tr>
-            @for(task <- tasksRow) {
-              <td>
-                @if(task != null) {
-                  <a href="@routes.Application.index(Some(task.id))">
-                  @task.title
-                  </a>
+        @*futureTasksMatrix.onComplete{ tryMatrix => *@
+          @*Await.result(futureTasksMatrix, Duration.Inf).map { tasksMatrix =>*@
+            @Await.result(futureTasksMatrix, Duration.Inf).map { tasksRow =>
+              <tr>
+                @tasksRow.map { task =>
+                  <td>
+                    @if(task != null) {
+                      <a href="@routes.Application.index(Some(task.id))">
+                      @task.title
+                      </a>
+                    }
+                  </td>
                 }
-              </td>
+              </tr>
             }
-          </tr>
-        }
       </table>
     </div>
 

@@ -11,6 +11,8 @@ object TaskState extends Enumeration {
 import controllers.TaskForm.Data
 import models.TaskState._
 
+import scala.concurrent.{ExecutionContext, Future}
+
 // case class Task(id: Int, title: String, description: String, state: TaskState)
 // Временное решение с mutable полями:
 case class Task(var id: Int, var title: String, var description: String, var state: TaskState)
@@ -19,39 +21,6 @@ object Task {
   import scala.collection.mutable._
   import slick.jdbc.JdbcBackend.Database
   import slick.jdbc.PostgresProfile.api._
-
-  /*class Tasks(tag: Tag) extends Table[(Int, String, String, String)](tag, "TASKS") {
-    def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
-    def title = column[String]("TITLE")
-    def description = column[String]("DESCRIPTION")
-    def state = column[String]("STATE")
-    def * = (id, title, description, state)
-  }
-  val tasks = TableQuery[Tasks]
-
-  val db = Database.forConfig("bugtracker_db")
-  try {
-    val setup = DBIO.seq(
-      tasks.schema.create,
-      tasks ++= Seq(
-        (1, "title1", "desc1", "TODO"),        (2, "title2", "desc2", "DONE"),
-        (3, "title3", "desc3", "TODO"),        (4, "title4", "desc4", "TODO"),
-        (5, "title5", "desc5", "IN_PROGRESS")
-      )
-    )
-    println("DONE")
-
-    val setupFuture = db.run(setup)
-    val resultFuture = setupFuture.flatMap { _ =>
-      println("Tasks:")
-      db.run(tasks.result).map(_.foreach {
-        case (id, title, description, state) =>
-          println(" " + id + "\t" + title + "\t" + description + "\t" + state)
-      })
-    }
-    Await.result(resultFuture, Duration(5, scala.concurrent.duration.SECONDS))
-    println("DONE-2")
-  } finally db.close*/
 
   // Временное решение, автоинкремент будет в БД
   private var counter = 7
@@ -78,8 +47,22 @@ object Task {
 
   // Генерирует из списка задач матрицу, полностью совпадающую со структурой таблицы в шаблоне:
   // TODO: исправить баг смещения столбцов, когда задачи одного и более типа полностью отсутствуют
-  def getTasksMatrixForTemplate: List[List[Task]] = {
-    if (list.nonEmpty) {
+  // TODO: когда с заглушкой в виде мутабельного списка будет покончено, поменять scala.Seq на просто Seq
+  def getTasksMatrixForTemplate(tasks: Future[scala.Seq[Task]])(implicit ec: ExecutionContext): Future[List[List[Task]]] = {
+    tasks.map(taskSeq => {
+      if (taskSeq.nonEmpty) {
+        // TODO: если будет время, замерить время выполнения с view и без
+        // TODO: желательно заменить конструкцию toMap -> values -> toList чем-то покороче
+        val sortedTasksMatrix = taskSeq.view.groupBy(_.state.id).toSeq.sortBy(_._1).toMap.values.toList
+        val maxRowLength = sortedTasksMatrix.view.map(_.size).max
+        // TODO: заменить null на Option(None)
+        sortedTasksMatrix.map(_.padTo(maxRowLength, null)).transpose
+      } else {
+        Nil
+      }
+    })
+
+    /*if (list.nonEmpty) {
       // TODO: если будет время, замерить время выполнения с view и без
       // TODO: желательно заменить конструкцию toMap -> values -> toList чем-то покороче
       val sortedTasksMatrix = getTasks.view.groupBy(_.state.id).toSeq.sortBy(_._1).toMap.values.toList
@@ -88,7 +71,7 @@ object Task {
       sortedTasksMatrix.map(_.padTo(maxRowLength, null)).transpose
     } else {
       Nil
-    }
+    }*/
   }
 
   def create(data: Data): Unit = {

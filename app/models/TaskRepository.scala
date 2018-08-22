@@ -42,4 +42,9 @@ class TaskRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
       ) += (title, description, state)
     /*(tasks.map(_ => {})) += Task(1, title, description, state)*/
   }
+
+  //
+  def tasksList: Future[Seq[Task]] = db.run {
+    tasks.result
+  }
 }
