@@ -5,8 +5,12 @@ import play.api.mvc._
 import models.Task
 import play.api.data.Form
 
+import scala.concurrent.ExecutionContext
+import models._
+
 @Singleton
-class Application @Inject()(cc: MessagesControllerComponents) extends MessagesAbstractController(cc) {
+class Application @Inject()(repo: TaskRepository, cc: MessagesControllerComponents)
+                           (implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
   import TaskForm._
 
   def index(implicit id: Option[Int]) = Action { implicit request: MessagesRequest[AnyContent] =>
@@ -19,7 +23,9 @@ class Application @Inject()(cc: MessagesControllerComponents) extends MessagesAb
     }
 
     val successFunction = { data: Data =>
-      Task.create(data)
+      repo.create(data.title, data.description, data.state).map { _ =>
+        Task.create(data)
+      }
       Redirect(routes.Application.index(None))/*.flashing("info" -> "Task added!")*/
     }
 

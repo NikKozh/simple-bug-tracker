@@ -17,6 +17,41 @@ case class Task(var id: Int, var title: String, var description: String, var sta
 
 object Task {
   import scala.collection.mutable._
+  import slick.jdbc.JdbcBackend.Database
+  import slick.jdbc.PostgresProfile.api._
+
+  /*class Tasks(tag: Tag) extends Table[(Int, String, String, String)](tag, "TASKS") {
+    def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
+    def title = column[String]("TITLE")
+    def description = column[String]("DESCRIPTION")
+    def state = column[String]("STATE")
+    def * = (id, title, description, state)
+  }
+  val tasks = TableQuery[Tasks]
+
+  val db = Database.forConfig("bugtracker_db")
+  try {
+    val setup = DBIO.seq(
+      tasks.schema.create,
+      tasks ++= Seq(
+        (1, "title1", "desc1", "TODO"),        (2, "title2", "desc2", "DONE"),
+        (3, "title3", "desc3", "TODO"),        (4, "title4", "desc4", "TODO"),
+        (5, "title5", "desc5", "IN_PROGRESS")
+      )
+    )
+    println("DONE")
+
+    val setupFuture = db.run(setup)
+    val resultFuture = setupFuture.flatMap { _ =>
+      println("Tasks:")
+      db.run(tasks.result).map(_.foreach {
+        case (id, title, description, state) =>
+          println(" " + id + "\t" + title + "\t" + description + "\t" + state)
+      })
+    }
+    Await.result(resultFuture, Duration(5, scala.concurrent.duration.SECONDS))
+    println("DONE-2")
+  } finally db.close*/
 
   // Временное решение, автоинкремент будет в БД
   private var counter = 7
