@@ -30,21 +30,26 @@ class TaskRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
   }
   private val tasks = TableQuery[TaskTable]
 
-  def create(title: String, description: String, state: TaskState): Future[Task] = db.run {
+  def create(title: String, description: String, state: TaskState): Future[String] = db.run {
     // We create a projection of just the name and age columns, since we're not inserting a value for the id column
-    (tasks.map(t => (t.title, t.description, t.state))
+    ((tasks.map(t => (t.title, t.description, t.state))
       // Now define it to return the id, because we want to know what id was generated for the person
       returning tasks.map(_.id)
       // And we define a transformation for the returned value, which combines our original parameters with the
       // returned id
       into ((restData, id) => Task(id, restData._1, restData._2, restData._3))
       // And finally, insert the person into the database
-      ) += (title, description, state)
+      ) += (title, description, state)).map(_ => "Task successfully added")
     /*(tasks.map(_ => {})) += Task(1, title, description, state)*/
   }
 
-  //
-  def tasksList: Future[Seq[Task]] = db.run {
+  def getTasksList: Future[Seq[Task]] = db.run {
     tasks.result
   }
+
+  def deleteTask(id: Int): Future[Int] = db.run {
+    tasks.filter(_.id === id).delete
+  }
+
+
 }

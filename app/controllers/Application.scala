@@ -5,33 +5,44 @@ import play.api.mvc._
 import models.Task
 import play.api.data.Form
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import models._
 
 @Singleton
-class Application @Inject()(repo: TaskRepository, cc: MessagesControllerComponents)
+class Application @Inject()(taskRepository: TaskRepository, cc: MessagesControllerComponents)
                            (implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
   import TaskForm._
 
-  private def getTasks = {
-    Task.getTasksMatrixForTemplate(repo.tasksList)
-  }
-
   // TODO: всё-таки разобраться с тем, нужно ли и id делать по умолчанию None, и если да, то в каком месте (здесь, routes, etc...)
-  def index(id: Option[Int], futureTasksMatrix: Future[List[List[Task]]] = getTasks) = Action { implicit request: MessagesRequest[AnyContent] =>
-    Ok(views.html.index(futureTasksMatrix, taskForm, id))
+  // TODO: детально разобрать, что здесь происходит
+  def index(id: Option[Int]) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    taskRepository.getTasksList.map { tasks =>
+      val matrixForTemplate = Task.getTasksMatrixForTemplate(tasks)
+      Ok(views.html.index(matrixForTemplate, taskForm, id))
+    }
+
+    /*Task.getTasksMatrixForTemplate(taskRepository.getTasksList).map { tasks =>
+      // val futureTasksMatrix = Task.getTasksMatrixForTemplate(taskRepository.getTasksList)
+      Ok(views.html.index(tasks, taskForm, id))
+    }*/
   }
 
-  def createTask = Action { implicit request: MessagesRequest[AnyContent] =>
+  def createTask = Action.async { implicit request: MessagesRequest[AnyContent] =>
     val errorFunction = { formWithErrors: Form[Data] =>
-      BadRequest(views.html.index(Task.getTasksMatrixForTemplate(repo.tasksList), formWithErrors))
+      taskRepository.getTasksList.map { tasks =>
+        BadRequest(views.html.index(Task.getTasksMatrixForTemplate(tasks), formWithErrors))
+      }
+      /*Future.successful{
+          BadRequest(views.html.index(Task.getTasksMatrixForTemplate(Await.result(taskRepository.getTasksList, Duration.Inf)), formWithErrors))
+        //}
+      }*/
     }
 
     val successFunction = { data: Data =>
-      repo.create(data.title, data.description, data.state).map { _ =>
+      taskRepository.create(data.title, data.description, data.state).map { _ =>
         Task.create(data)
+        Redirect(routes.Application.index(None)) /*.flashing("info" -> "Task added!")*/
       }
-      Redirect(routes.Application.index(None)/*.flashing("info" -> "Task added!")*/
     }
 
     val formValidationResult = taskForm.bindFromRequest
@@ -39,17 +50,21 @@ class Application @Inject()(repo: TaskRepository, cc: MessagesControllerComponen
   }
 
   // TODO: проверить на дублирующийся код
-  def updateTask(id: Int) = Action { implicit request: MessagesRequest[AnyContent] =>
-    /*Task.update(id)
-    Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))*/
+  def updateTask(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    //Task.update(id)
+    //Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))
 
     val errorFunction = { formWithErrors: Form[Data] =>
-      BadRequest(views.html.index(Task.getTasksMatrixForTemplate(repo.tasksList), formWithErrors))
+      taskRepository.getTasksList.map { tasks =>
+        BadRequest(views.html.index(Task.getTasksMatrixForTemplate(tasks), formWithErrors))
+      }
     }
 
     val successFunction = { data: Data =>
-      Task.update(id, data)
-      Redirect(routes.Application.index(None))/*.flashing("info" -> "Task added!")*/
+      taskRepository.create(data.title, data.description, data.state).map { _ =>
+        Task.update(id, data)
+        Redirect(routes.Application.index(None)).flashing("info" -> "Task added!")
+      }
     }
 
     val formValidationResult = taskForm.bindFromRequest

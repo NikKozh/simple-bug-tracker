@@ -1,7 +1,7 @@
 @import scala.concurrent.Future
 @import scala.concurrent.{ExecutionContext, Await}
 @import scala.concurrent.duration.Duration
-@(futureTasksMatrix: Future[List[List[Task]]], form: Form[TaskForm.Data], id: Option[Int] = None)(implicit request: MessagesRequestHeader, ec: ExecutionContext)
+@(futureTasksMatrix: List[List[Task]], form: Form[TaskForm.Data], id: Option[Int] = None)(implicit request: MessagesRequestHeader, ec: ExecutionContext)
 
 @main("Simple bug tracker") {
 
@@ -131,8 +131,8 @@
         </tr>
 
         @*futureTasksMatrix.onComplete{ tryMatrix => *@
-          @*Await.result(futureTasksMatrix, Duration.Inf).map { tasksMatrix =>*@
-            @Await.result(futureTasksMatrix, Duration.Inf).map { tasksRow =>
+          @futureTasksMatrix.map { tasksRow =>
+            @*Await.result(futureTasksMatrix, Duration.Inf).map { tasksRow =>*@
               <tr>
                 @tasksRow.map { task =>
                   <td>

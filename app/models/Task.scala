@@ -11,7 +11,8 @@ object TaskState extends Enumeration {
 import controllers.TaskForm.Data
 import models.TaskState._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 // case class Task(id: Int, title: String, description: String, state: TaskState)
 // Временное решение с mutable полями:
@@ -48,19 +49,20 @@ object Task {
   // Генерирует из списка задач матрицу, полностью совпадающую со структурой таблицы в шаблоне:
   // TODO: исправить баг смещения столбцов, когда задачи одного и более типа полностью отсутствуют
   // TODO: когда с заглушкой в виде мутабельного списка будет покончено, поменять scala.Seq на просто Seq
-  def getTasksMatrixForTemplate(tasks: Future[scala.Seq[Task]])(implicit ec: ExecutionContext): Future[List[List[Task]]] = {
-    tasks.map(taskSeq => {
-      if (taskSeq.nonEmpty) {
-        // TODO: если будет время, замерить время выполнения с view и без
-        // TODO: желательно заменить конструкцию toMap -> values -> toList чем-то покороче
-        val sortedTasksMatrix = taskSeq.view.groupBy(_.state.id).toSeq.sortBy(_._1).toMap.values.toList
-        val maxRowLength = sortedTasksMatrix.view.map(_.size).max
-        // TODO: заменить null на Option(None)
-        sortedTasksMatrix.map(_.padTo(maxRowLength, null)).transpose
-      } else {
-        Nil
-      }
-    })
+  def getTasksMatrixForTemplate(taskSeq: scala.Seq[Task])(implicit ec: ExecutionContext): List[List[Task]] = {
+    //tasks.map(taskSeq => {
+    // val taskSeq = Await.result(tasks, Duration.Inf)
+    if (taskSeq.nonEmpty) {
+      // TODO: если будет время, замерить время выполнения с view и без
+      // TODO: желательно заменить конструкцию toMap -> values -> toList чем-то покороче
+      val sortedTasksMatrix = taskSeq.view.groupBy(_.state.id).toSeq.sortBy(_._1).toMap.values.toList
+      val maxRowLength = sortedTasksMatrix.view.map(_.size).max
+      // TODO: заменить null на Option(None)
+      sortedTasksMatrix.map(_.padTo(maxRowLength, null)).transpose
+    } else {
+      Nil
+    }
+  }
 
     /*if (list.nonEmpty) {
       // TODO: если будет время, замерить время выполнения с view и без
@@ -72,7 +74,7 @@ object Task {
     } else {
       Nil
     }*/
-  }
+  //}
 
   def create(data: Data): Unit = {
     list += Task(increment, data.title, data.description, data.state)
