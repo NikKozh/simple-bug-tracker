@@ -9,8 +9,7 @@ object TaskForm {
   import play.api.data.Forms._
   import play.api.data.Form
 
-  // TODO: не забыть выяснить, как обрабатывать потом state при загрузке из БД
-  case class Data(title: String, description: String, state: TaskState)
+  case class TaskData(title: String, description: String, state: TaskState)
 
   // TODO: если останется время - досконально разобрать
   // Адаптированный метод со StackOverflow:
@@ -24,11 +23,11 @@ object TaskForm {
       Map(key -> value.toString)
   }
 
-  val taskForm: Form[Data] = Form {
+  val taskForm: Form[TaskData] = Form {
     mapping(
       "title" -> nonEmptyText,
       "description" -> text,
       "state" -> Forms.of[TaskState]
-    )(Data.apply)(Data.unapply)
+    )(TaskData.apply)(TaskData.unapply)
   }
 }

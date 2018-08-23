@@ -18,17 +18,22 @@ class Application @Inject()(taskRepository: TaskRepository, cc: MessagesControll
   def index(id: Option[Int]) = Action.async { implicit request: MessagesRequest[AnyContent] =>
     taskRepository.getTasksList.map { tasks =>
       val matrixForTemplate = Task.getTasksMatrixForTemplate(tasks)
-      Ok(views.html.index(matrixForTemplate, taskForm, id))
+      val editableTask = id match {
+        case Some(wantedId) => tasks.find(task => task.id == wantedId)
+        case None => None
+      }
+      Ok(views.html.index(matrixForTemplate, taskForm, editableTask))
     }
 
-    /*Task.getTasksMatrixForTemplate(taskRepository.getTasksList).map { tasks =>
+    /* То, что не сработало:
+    Task.getTasksMatrixForTemplate(taskRepository.getTasksList).map { tasks =>
       // val futureTasksMatrix = Task.getTasksMatrixForTemplate(taskRepository.getTasksList)
       Ok(views.html.index(tasks, taskForm, id))
     }*/
   }
 
   def createTask = Action.async { implicit request: MessagesRequest[AnyContent] =>
-    val errorFunction = { formWithErrors: Form[Data] =>
+    val errorFunction = { formWithErrors: Form[TaskData] =>
       taskRepository.getTasksList.map { tasks =>
         BadRequest(views.html.index(Task.getTasksMatrixForTemplate(tasks), formWithErrors))
       }
@@ -38,7 +43,7 @@ class Application @Inject()(taskRepository: TaskRepository, cc: MessagesControll
       }*/
     }
 
-    val successFunction = { data: Data =>
+    val successFunction = { data: TaskData =>
       taskRepository.create(data.title, data.description, data.state).map { _ =>
         Task.create(data)
         Redirect(routes.Application.index(None)) /*.flashing("info" -> "Task added!")*/
@@ -54,13 +59,13 @@ class Application @Inject()(taskRepository: TaskRepository, cc: MessagesControll
     //Task.update(id)
     //Ok(views.html.index(Task.getTasksMatrixForTemplate, taskForm))
 
-    val errorFunction = { formWithErrors: Form[Data] =>
+    val errorFunction = { formWithErrors: Form[TaskData] =>
       taskRepository.getTasksList.map { tasks =>
         BadRequest(views.html.index(Task.getTasksMatrixForTemplate(tasks), formWithErrors))
       }
     }
 
-    val successFunction = { data: Data =>
+    val successFunction = { data: TaskData =>
       taskRepository.create(data.title, data.description, data.state).map { _ =>
         Task.update(id, data)
         Redirect(routes.Application.index(None)).flashing("info" -> "Task added!")

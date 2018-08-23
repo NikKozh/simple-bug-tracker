@@ -1,7 +1,7 @@
 @import scala.concurrent.Future
 @import scala.concurrent.{ExecutionContext, Await}
 @import scala.concurrent.duration.Duration
-@(futureTasksMatrix: List[List[Task]], form: Form[TaskForm.Data], id: Option[Int] = None)(implicit request: MessagesRequestHeader, ec: ExecutionContext)
+@(tasksMatrix: List[List[Task]], form: Form[TaskForm.TaskData], editableTask: Option[Task] = None)(implicit request: MessagesRequestHeader, ec: ExecutionContext)
 
 @main("Simple bug tracker") {
 
@@ -43,11 +43,11 @@
         <h2>Редактировать задачу</h2>
 
         @* TODO: посмотреть на наличие дублирующегося кода, мб переделать условие *@
-        @if(id.isDefined) {
-          @defining(Task.getTask(id.get)) { editableTask =>
+        @*if(id.isDefined) {
+          @defining(Task.getTask(id.get)) { editableTask => *@
             @if(editableTask.isDefined ) {
 
-              <form action="@helper.CSRF(routes.Application.updateTask(id.get))" method="post">
+              <form action="@helper.CSRF(routes.Application.updateTask(editableTask.get.id))" method="post">
                 <label>
                   Название:
                   <input name="title" type="text" value="@editableTask.get.title" required/>
@@ -76,12 +76,10 @@
 
                 <input type="submit" value="Редактировать"/>
               </form>
-              <form action="@helper.CSRF(routes.Application.deleteTask(id.get))" method="post">
+              <form action="@helper.CSRF(routes.Application.deleteTask(editableTask.get.id))" method="post">
                 <input type="submit" value="Удалить"/>
               </form>
-            }
-          }
-        } else {
+            } else {
           <form id="editTask">
             <label>
               Название:
@@ -131,7 +129,7 @@
         </tr>
 
         @*futureTasksMatrix.onComplete{ tryMatrix => *@
-          @futureTasksMatrix.map { tasksRow =>
+          @tasksMatrix.map { tasksRow =>
             @*Await.result(futureTasksMatrix, Duration.Inf).map { tasksRow =>*@
               <tr>
                 @tasksRow.map { task =>

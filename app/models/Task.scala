@@ -8,7 +8,7 @@ object TaskState extends Enumeration {
   val DONE        = Value("Done")
 }
 
-import controllers.TaskForm.Data
+import controllers.TaskForm.TaskData
 import models.TaskState._
 
 import scala.concurrent.duration.Duration
@@ -76,7 +76,7 @@ object Task {
     }*/
   //}
 
-  def create(data: Data): Unit = {
+  def create(data: TaskData): Unit = {
     list += Task(increment, data.title, data.description, data.state)
   }
 
@@ -84,7 +84,7 @@ object Task {
     list = list.filterNot(task => task.id == id)
   }
 
-  def update(id: Int, data: Data):Unit = {
+  def update(id: Int, data: TaskData):Unit = {
     // Нет смысла писать что-то более красивое\оптимизированное,
     // т.к. в дальнейшем всё равно будет взаимодействие с БД
     for (task <- list) {
