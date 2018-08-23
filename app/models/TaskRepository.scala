@@ -43,13 +43,19 @@ class TaskRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
     /*(tasks.map(_ => {})) += Task(1, title, description, state)*/
   }
 
-  def getTasksList: Future[Seq[Task]] = db.run {
+  def getTaskList: Future[Seq[Task]] = db.run {
     tasks.result
+  }
+
+  def getTask(id: Int): Future[Seq[Task]] = db.run {
+    tasks.filter(_.id === id).result
   }
 
   def deleteTask(id: Int): Future[Int] = db.run {
     tasks.filter(_.id === id).delete
   }
 
-
+  def updateTask(id: Int, newTitle: String, newDescription: String, newState: TaskState): Future[String] = {
+    Future("") // TODO: доделать
+  }
 }

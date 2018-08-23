@@ -43,75 +43,73 @@
         <h2>Редактировать задачу</h2>
 
         @* TODO: посмотреть на наличие дублирующегося кода, мб переделать условие *@
-        @*if(id.isDefined) {
-          @defining(Task.getTask(id.get)) { editableTask => *@
-            @if(editableTask.isDefined ) {
+          @if(editableTask.isDefined ) {
 
-              <form action="@helper.CSRF(routes.Application.updateTask(editableTask.get.id))" method="post">
-                <label>
-                  Название:
-                  <input name="title" type="text" value="@editableTask.get.title" required/>
-                </label>
-
-                <br>
-                <br>
-
-                <div class="left-info">
-                  <label>
-                    Описание:
-                    <br>
-                    <textarea name="description" rows="10" cols="50">@editableTask.get.description</textarea>
-                  </label>
-                </div>
-                <div class="right-info">
-                  <p>Состояние:</p>
-
-                  <p><label><input name="state" type="radio" value="TODO" @{if (editableTask.get.state == TaskState.TODO) "checked"}>TODO</label></p>
-                  <p><label><input name="state" type="radio" value="In Progress" @{if (editableTask.get.state == TaskState.IN_PROGRESS) "checked"}>In Progress</label></p>
-                  <p><label><input name="state" type="radio" value="Done" @{if (editableTask.get.state == TaskState.DONE) "checked"}>Done</label></p>
-                </div>
-
-                <br>
-                <br>
-
-                <input type="submit" value="Редактировать"/>
-              </form>
-              <form action="@helper.CSRF(routes.Application.deleteTask(editableTask.get.id))" method="post">
-                <input type="submit" value="Удалить"/>
-              </form>
-            } else {
-          <form id="editTask">
-            <label>
-              Название:
-              <input class="title" type="text" disabled/>
-            </label>
-
-            <br>
-            <br>
-
-            <div class="left-info">
+            <form action="@helper.CSRF(routes.Application.updateTask(editableTask.get.id))" method="post">
               <label>
-                Описание:
-                <br>
-                <textarea rows="10" cols="50" disabled></textarea>
+                Название:
+                <input name="title" type="text" value="@editableTask.get.title" required/>
               </label>
-            </div>
-            <div class="right-info">
-              <p>Состояние:</p>
-              <p><label><input name="state" type="radio" value="TODO" disabled>TODO</label></p>
-              <p><label><input name="state" type="radio" value="In Progress" disabled>In Progress</label></p>
-              <p><label><input name="state" type="radio" value="Done" disabled>Done</label></p>
-            </div>
 
-            <br>
-            <br>
+              <br>
+              <br>
 
-            <input type="submit" value="Редактировать" disabled/>
-          </form>
-          <form>
-            <input type="submit" value="Удалить" disabled/>
-          </form>
-        }
+              <div class="left-info">
+                <label>
+                  Описание:
+                  <br>
+                  <textarea name="description" rows="10" cols="50">@editableTask.get.description</textarea>
+                </label>
+              </div>
+              <div class="right-info">
+                <p>Состояние:</p>
+
+                <p><label><input name="state" type="radio" value="TODO" @{if (editableTask.get.state == TaskState.TODO) "checked"}>TODO</label></p>
+                <p><label><input name="state" type="radio" value="In Progress" @{if (editableTask.get.state == TaskState.IN_PROGRESS) "checked"}>In Progress</label></p>
+                <p><label><input name="state" type="radio" value="Done" @{if (editableTask.get.state == TaskState.DONE) "checked"}>Done</label></p>
+              </div>
+
+              <br>
+              <br>
+
+              <input type="submit" value="Редактировать"/>
+            </form>
+            <form action="@helper.CSRF(routes.Application.deleteTask(editableTask.get.id))" method="post">
+              <input type="submit" value="Удалить"/>
+            </form>
+          } else {
+            <form id="editTask">
+              <label>
+                Название:
+                <input class="title" type="text" disabled/>
+              </label>
+
+              <br>
+              <br>
+
+              <div class="left-info">
+                <label>
+                  Описание:
+                  <br>
+                  <textarea rows="10" cols="50" disabled></textarea>
+                </label>
+              </div>
+              <div class="right-info">
+                <p>Состояние:</p>
+                <p><label><input name="state" type="radio" value="TODO" disabled>TODO</label></p>
+                <p><label><input name="state" type="radio" value="In Progress" disabled>In Progress</label></p>
+                <p><label><input name="state" type="radio" value="Done" disabled>Done</label></p>
+              </div>
+
+              <br>
+              <br>
+
+              <input type="submit" value="Редактировать" disabled/>
+            </form>
+            <form>
+              <input type="submit" value="Удалить" disabled/>
+            </form>
+          }
 
         <br>
         <p><a href="/">Перейти к полнотекстовому поиску по задачам</a></p>
@@ -128,21 +126,19 @@
           }
         </tr>
 
-        @*futureTasksMatrix.onComplete{ tryMatrix => *@
-          @tasksMatrix.map { tasksRow =>
-            @*Await.result(futureTasksMatrix, Duration.Inf).map { tasksRow =>*@
-              <tr>
-                @tasksRow.map { task =>
-                  <td>
-                    @if(task != null) {
-                      <a href="@routes.Application.index(Some(task.id))">
-                      @task.title
-                      </a>
-                    }
-                  </td>
+        @tasksMatrix.map { tasksRow =>
+          <tr>
+            @tasksRow.map { task =>
+              <td>
+                @if(task != null) {
+                  <a href="@routes.Application.index(Some(task.id))">
+                  @task.title
+                  </a>
                 }
-              </tr>
+              </td>
             }
+          </tr>
+          }
       </table>
     </div>
 
