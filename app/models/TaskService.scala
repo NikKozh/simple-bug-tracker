@@ -1,5 +1,7 @@
 package models
 
+// TODO: продолжить рефакторинг, отделить сервис от всего остального
+
 object TaskState extends Enumeration {
   type TaskState = Value
   // столбцы будут рендериться в шаблоне согласно порядку перечисления:
@@ -56,8 +58,7 @@ class TaskService @Inject() (taskRepository: TaskRepository) {
     taskRepository.deleteTask(id)
   }
 
-  def updateTask(id: Int, newData: TaskData): Future[String] = {
-    // TODO: доделать изменение задачи
+  def updateTask(id: Int, newData: TaskData): Future[Int] = {
     taskRepository.updateTask(id, newData.title, newData.description, newData.state)
   }
 }

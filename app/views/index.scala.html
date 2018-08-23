@@ -1,7 +1,7 @@
 @import scala.concurrent.Future
 @import scala.concurrent.{ExecutionContext, Await}
 @import scala.concurrent.duration.Duration
-@(tasksMatrix: List[List[Task]], form: Form[TaskForm.TaskData], editableTask: Option[Task] = None)(implicit request: MessagesRequestHeader, ec: ExecutionContext)
+@(tasksMatrix: List[List[Task]], form: Form[TaskForm.TaskData], editableTask: Option[Task] = None)(implicit request: MessagesRequestHeader)
 
 @main("Simple bug tracker") {
 

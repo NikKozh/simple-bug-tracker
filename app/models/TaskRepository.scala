@@ -30,6 +30,9 @@ class TaskRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
   }
   private val tasks = TableQuery[TaskTable]
 
+  // TODO: поменять на более простой вариант, т.к. нам не надо возвращать ID
+  // Пример:  coffees.map(c => (c.name, c.supID, c.price)) += ("Colombian_Decaf", 101, 8.99)
+  // (в случае пропуска значения оно заполняется базой данных, если это AutoInc значение, то всё норм)
   def create(title: String, description: String, state: TaskState): Future[String] = db.run {
     // We create a projection of just the name and age columns, since we're not inserting a value for the id column
     ((tasks.map(t => (t.title, t.description, t.state))
@@ -55,7 +58,7 @@ class TaskRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
     tasks.filter(_.id === id).delete
   }
 
-  def updateTask(id: Int, newTitle: String, newDescription: String, newState: TaskState): Future[String] = {
-    Future("") // TODO: доделать
+  def updateTask(id: Int, newTitle: String, newDescription: String, newState: TaskState): Future[Int] = db.run {
+    tasks.filter(_.id === id).update(Task(id, newTitle, newDescription, newState))
   }
 }
