@@ -1,0 +1,18 @@
+@()
+
+@main("Simple bug tracker - search") {
+  <h1>Полнотекстовый поиск на основе Apache Lucene</h1>
+  <a href="@routes.Application.index(None)">Главная страница</a>
+  <br>
+  <br>
+  @* TODO: заменить заглушку на нормальную форму *@
+  <form>
+    <label>Поиск по описанию задачи:
+      <br>
+      <input type="text"/>
+      <input type="submit" value="Найти">
+    </label>
+  </form>
+  <br>
+  <p>Заглушка для результатов поиска...</p>
+}

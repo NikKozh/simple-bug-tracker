@@ -45,6 +45,7 @@
         @* TODO: посмотреть на наличие дублирующегося кода, мб переделать условие *@
           @if(editableTask.isDefined ) {
 
+            @* TODO: написать, почему не воспользовался построением input с помощью хелпера *@
             <form action="@helper.CSRF(routes.Application.updateTask(editableTask.get.id))" method="post">
               <label>
                 Название:
@@ -112,7 +113,7 @@
           }
 
         <br>
-        <p><a href="/">Перейти к полнотекстовому поиску по задачам</a></p>
+        <p><a href="@routes.SearchController.search()">Перейти к полнотекстовому поиску по задачам</a></p>
       </div>
     </div>
 
