@@ -1,5 +1,7 @@
 package controllers
 
+// TODO: разобраться с понятием side-effect и добавить пустые круглые скобки там, где они необоснованно убраны, по соглашению
+
 import javax.inject._
 import play.api.mvc._
 import play.api.data.Form
@@ -9,7 +11,7 @@ import scala.concurrent.duration._
 import models._
 
 @Singleton
-class Application @Inject()(taskService: TaskService, cc: MessagesControllerComponents)
+class Application @Inject()(taskService: TaskService, cc: MessagesControllerComponents, searcher: Search)
                            (implicit ec: ExecutionContext) extends MessagesAbstractController(cc) {
   import TaskForm._
 
@@ -38,6 +40,7 @@ class Application @Inject()(taskService: TaskService, cc: MessagesControllerComp
 
     val successFunction = { data: TaskData =>
       taskService.createTask(data).map { _ =>
+        searcher.setFutureIndex()
         Redirect(routes.Application.index(None))/*.flashing("info" -> "Task added!")*/
       }
     }
@@ -56,6 +59,7 @@ class Application @Inject()(taskService: TaskService, cc: MessagesControllerComp
 
     val successFunction = { data: TaskData =>
       taskService.updateTask(id, data).map { _ =>
+        searcher.setFutureIndex()
         Redirect(routes.Application.index(None))/*.flashing("info" -> "Task added!")*/
       }
     }
@@ -65,6 +69,9 @@ class Application @Inject()(taskService: TaskService, cc: MessagesControllerComp
   }
 
   def deleteTask(id: Int) = Action.async { implicit request: MessagesRequest[AnyContent] =>
-    taskService.deleteTask(id).map(_ => Redirect(routes.Application.index(None)))
+    taskService.deleteTask(id).map { _ =>
+      searcher.setFutureIndex()
+      Redirect(routes.Application.index(None))
+    }
   }
 }

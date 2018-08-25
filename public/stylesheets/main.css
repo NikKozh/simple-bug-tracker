@@ -34,6 +34,16 @@
     border-collapse: collapse;
 }
 
+#searchResult {
+    border: 1px solid gray;
+    border-collapse: collapse;
+    width: 800px;
+}
+
+#searchResult td, #searchResult th {
+    border: 1px solid gray;
+    border-collapse: collapse;
+}
 
 .left-info {
     float: left;

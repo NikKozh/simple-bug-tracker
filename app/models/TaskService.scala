@@ -22,13 +22,13 @@ case class Task(var id: Int, var title: String, var description: String, var sta
 
 @Singleton
 class TaskService @Inject() (taskRepository: TaskRepository) {
-  def getTaskSequence: Future[Seq[Task]] = {
+  def getTasks: Future[Seq[Task]] = {
     taskRepository.getTaskList
   }
 
   // TODO: подумать над вариантом поиска в TaskRepository, а не здесь
   def getTask(id: Int)(implicit ec: ExecutionContext): Future[Option[Task]] = {
-    getTaskSequence.map{ taskSeq =>
+    getTasks.map{ taskSeq =>
       taskSeq.find(task => task.id == id)
     }
   }
@@ -36,7 +36,7 @@ class TaskService @Inject() (taskRepository: TaskRepository) {
   // Генерирует из списка задач матрицу, полностью совпадающую со структурой таблицы в шаблоне:
   // TODO: исправить баг смещения столбцов, когда задачи одного и более типа полностью отсутствуют
   def getTaskMatrixForTemplate()(implicit ec: ExecutionContext): Future[List[List[Task]]] = {
-    getTaskSequence.map{ taskSeq =>
+    getTasks.map{ taskSeq =>
       if (taskSeq.nonEmpty) {
         // TODO: если будет время, замерить время выполнения с view и без
         // TODO: желательно заменить конструкцию toMap -> values -> toList чем-то покороче
@@ -55,6 +55,7 @@ class TaskService @Inject() (taskRepository: TaskRepository) {
   }
 
   def deleteTask(id: Int): Future[Int] = {
+    println("TASK DELETED")
     taskRepository.deleteTask(id)
   }
 

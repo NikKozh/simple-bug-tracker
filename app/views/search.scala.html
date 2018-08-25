@@ -1,18 +1,39 @@
-@()
+@import org.apache.lucene.document.Document
+@(searchResults: Option[Array[Document]] = None, searchQuery: String = "")
 
 @main("Simple bug tracker - search") {
   <h1>Полнотекстовый поиск на основе Apache Lucene</h1>
-  <a href="@routes.Application.index(None)">Главная страница</a>
+  <a href="@routes.Application.index(None)">Вернуться на главную страницу</a>
   <br>
   <br>
   @* TODO: заменить заглушку на нормальную форму *@
-  <form>
+  <form action="@routes.SearchController.search()" method="get">
     <label>Поиск по описанию задачи:
       <br>
-      <input type="text"/>
+      <input type="text" name="query" required/>
       <input type="submit" value="Найти">
     </label>
   </form>
   <br>
-  <p>Заглушка для результатов поиска...</p>
+  @if(searchResults.isDefined) {
+    <h2>Результаты поиска</h2>
+    <p><b>Запрос:</b> @searchQuery</p>
+    @if(searchResults.get.isEmpty) {
+      <p>По Вашему запросу ничего не найдено.</p>
+    } else {
+      <p><b>Найдено задач:</b> @searchResults.get.length</p>
+      <table id="searchResult">
+        <tr>
+          <th>Заголовок</th><th>Описание</th><th>Состояние</th>
+        </tr>
+        @for(doc <- searchResults.get) {
+          <tr>
+            <td><a href="@routes.Application.index(Some(doc.get("id").toInt))">@doc.get("title")</a></td>
+            <td>@doc.get("description")</td>
+            <td>@doc.get("state")</td>
+          </tr>
+        }
+      </table>
+    }
+  }
 }

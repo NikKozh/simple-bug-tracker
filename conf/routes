@@ -10,7 +10,7 @@ POST    /                           controllers.Application.createTask
 POST    /:id/update                 controllers.Application.updateTask(id: Int)
 POST    /:id/delete                 controllers.Application.deleteTask(id: Int)
 
-GET     /search                     controllers.SearchController.search
+GET     /search                     controllers.SearchController.search(query: String ?= "")
 
 # TODO: по возможности заменить устаревшее versioned на инъекцию
 # Map static resources from the /public folder to the /assets URL path
