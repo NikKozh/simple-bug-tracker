@@ -34,16 +34,50 @@ class TaskService @Inject() (taskRepository: TaskRepository) {
   }
 
   // Генерирует из списка задач матрицу, полностью совпадающую со структурой таблицы в шаблоне:
-  // TODO: исправить баг смещения столбцов, когда задачи одного и более типа полностью отсутствуют
   def getTaskMatrixForTemplate()(implicit ec: ExecutionContext): Future[List[List[Task]]] = {
     getTasks.map{ taskSeq =>
       if (taskSeq.nonEmpty) {
-        // TODO: если будет время, замерить время выполнения с view и без
-        // TODO: желательно заменить конструкцию toMap -> values -> toList чем-то покороче
-        val sortedTasksMatrix = taskSeq.view.groupBy(_.state.id).toSeq.sortBy(_._1).toMap.values.toList
-        val maxRowLength = sortedTasksMatrix.view.map(_.size).max
-        // TODO: заменить null на Option(None)
-        sortedTasksMatrix.map(_.padTo(maxRowLength, null)).transpose
+
+        /*
+          Передо мной встала следующая задача: преобразовать исходный смешанный список в структуру, которую будет
+          удобно рендерить как таблицу в HTML со столбцами в виде состояний задач. Пример такой структуры:
+
+          List(
+                List(  todoTask 1,   in progress task 1,   done task 1  ),
+                List(  todoTask 2,   null              ,   done task 2  ),
+                List(  null      ,   null              ,   done task 3  )
+          )
+
+          Обычно подробно комментировать каждую строчку кода - плохая практика, но в данном случае метод содержит
+          много последовательных операций, которые я посчитал нужным объяснить для лучшего понимания "что происходит".
+          К сожалению, я не нашёл более простого и характерного для Scala решения данной задачи.
+        */
+
+        // Из исходного списка задач формируем Map, где ключи - это порядковые номера состояний задач:
+        // (view для оптимизации, чтобы не создавались промежуточные коллекции)
+        val tasksGroupedByStates = taskSeq.view.groupBy(_.state.id)
+        // Если задачи какого-либо состояния отсутствуют, то их ключи всё равно нужно внести для корректного отображения
+        // html-таблицы. Поэтому вставляем недостающие ключи, в качестве их значений - пустая последовательность:
+        val sortedTaskMatrix = TaskState.values.flatMap(state =>
+          if (tasksGroupedByStates.filterKeys(key => key == state.id).isEmpty)
+            tasksGroupedByStates.updated(state.id, Nil)
+          else
+            tasksGroupedByStates
+        // Затем сортируем по ключам, чтобы столбцы конечной матрицы были в том же порядке,
+        // что и перечисление состояний, после чего отбрасываем ключи и приводим к списку:
+        ).toSeq.sortBy(_._1).toMap.values.toList
+        // Для успешного поворота матрицы нужно, чтобы все списки были одной длины, вычисляем длину самого большого:
+        val maxRowLength = sortedTaskMatrix.map(_.size).max
+        // Дополняем каждый список с помощью null и транспонируем матрицу:
+        sortedTaskMatrix.map(_.padTo(maxRowLength, null)).transpose
+
+        /*
+          В Scala использование null - также плохая практика, но для введения более правильного Option(None)
+          мне пришлось бы обернуть каждый элемент списка также в Option, что потребовало бы дополнительных
+          операций и ещё больше увеличило метод. К тому же, код не будет никем сопровождаться, что ещё больше
+          снижает "вредность" null.
+        */
+
       } else {
         Nil
       }

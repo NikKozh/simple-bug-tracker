@@ -49,7 +49,7 @@ case class Search @Inject()(taskService: TaskService, lifecycle: ApplicationLife
     val queryParser = new QueryParser("description", analyzer)
     val query = queryParser.parse(keyword)
 
-    val hits = searcher.search(query, 100)
+    val hits = searcher.search(query, Int.MaxValue)
     val scoreDoc = hits.scoreDocs
     println("RESULTS FOUND: " + hits.totalHits)
     println("SEARCH RESULTS")
