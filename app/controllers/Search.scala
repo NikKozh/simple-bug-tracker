@@ -1,27 +1,18 @@
 package controllers
 
 import models._
-import java.nio.file.FileSystems
 
 import org.apache.lucene.document._
-import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.index._
 import org.apache.lucene.search._
-import akka.actor.ActorSystem
-import akka.event.{Logging, LoggingAdapter}
-import akka.stream.ActorMaterializer
-import javax.inject._
-import org.apache.lucene.analysis.core.KeywordAnalyzer
-import org.apache.lucene.index.IndexWriterConfig.OpenMode
-import org.apache.lucene.queryparser.classic.{MultiFieldQueryParser, QueryParser}
-import org.apache.lucene.store.FSDirectory
-import org.apache.lucene.analysis.standard.StandardAnalyzer
+import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.document.{Document, Field}
-import org.apache.lucene.index.{IndexWriter, Term}
+import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.store.RAMDirectory
 import org.apache.lucene.analysis.ru._
-import play.api.inject.ApplicationLifecycle
 
+import javax.inject._
+import play.api.inject.ApplicationLifecycle
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
