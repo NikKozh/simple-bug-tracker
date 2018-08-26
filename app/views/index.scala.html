@@ -1,22 +1,38 @@
 @import scala.concurrent.Future
 @import scala.concurrent.{ExecutionContext, Await}
 @import scala.concurrent.duration.Duration
-@(tasksMatrix: List[List[Task]], form: Form[TaskForm.TaskData], editableTask: Option[Task] = None)(implicit request: MessagesRequestHeader)
+@*
+  Экземпляр задачи, которую нужно отредактировать, передаётся отдельно, а не по id. Это сделано для того, чтобы
+  обращение к БД и поиск конкретного элемента взял на себя вызывающий код, а не шаблон
+*@
+@(tasksMatrix: List[List[Task]], form: Form[TaskForm.TaskData],
+  editableTask: Option[Task] = None)(implicit request: MessagesRequestHeader, assetsFinder: AssetsFinder)
 
-@main("Simple bug tracker") {
+@main("Simple bug tracker", assetsFinder) {
 
   <div class="wrapper">
-
+    @* Глобальные ошибки не привязываются к конкретной форме, поэтому отображаются отдельно здесь: *@
+    @if(form.hasGlobalErrors) {
+      @form.globalErrors.map { error: FormError =>
+        <p>@error.key: @error.message</p>
+      }
+    }
     <div id="sidebar">
       <div class="card">
-        <h2>Создать задачу</h2>
-        <form action="@helper.CSRF(routes.Application.createTask())" method="post">
-          <label>
-            Название: <input name="title" type="text" required/>
-          </label>
 
-          <br>
-          <br>
+        @*
+          Для рендеринга и обработки форм в шаблоне, как правило, пользуются хелпером Twirl.
+          В даннном случае были выбраны обычные HTML-теги из-за их большей гибкости и читаемости.
+          Например, поместить текст по-умолчанию в textarea, который при этом может редактировать юзер,
+          средствами хелпера не удалось (тег value не работает). Т.е. нужно было либо писать свою часть
+          хелпера для textarea, либо пользоваться стандартными тегами.
+        *@
+
+        <h2>Создать задачу</h2>
+        <form action="@helper.CSRF(routes.HomeController.createTask())" method="post">
+          <p><label>
+            Название: <input name="title" type="text" required/>
+          </label></p>
 
           <div class="left-info">
             <label>
@@ -41,84 +57,83 @@
 
       <div class="card">
         <h2>Редактировать задачу</h2>
+        @*
+          Структура формы редактирования задачи неизменна, меняется только доступность её элементов и их содержимое.
+          Поэтому в данном случае все теги прописываются только один раз, но содержат условия для прописывания
+          необходимых атрибутов в зависимости от ситуации.
 
-        @* TODO: посмотреть на наличие дублирующегося кода, мб переделать условие *@
-          @if(editableTask.isDefined ) {
-
-            @* TODO: написать, почему не воспользовался построением input с помощью хелпера *@
-            <form action="@helper.CSRF(routes.Application.updateTask(editableTask.get.id))" method="post">
-              <label>
-                Название:
-                <input name="title" type="text" value="@editableTask.get.title" required/>
-              </label>
-
-              <br>
-              <br>
-
-              <div class="left-info">
-                <label>
-                  Описание:
-                  <br>
-                  <textarea name="description" rows="10" cols="50">@editableTask.get.description</textarea>
-                </label>
-              </div>
-              <div class="right-info">
-                <p>Состояние:</p>
-
-                <p><label><input name="state" type="radio" value="TODO" @{if (editableTask.get.state == TaskState.TODO) "checked"}>TODO</label></p>
-                <p><label><input name="state" type="radio" value="In Progress" @{if (editableTask.get.state == TaskState.IN_PROGRESS) "checked"}>In Progress</label></p>
-                <p><label><input name="state" type="radio" value="Done" @{if (editableTask.get.state == TaskState.DONE) "checked"}>Done</label></p>
-              </div>
-
-              <br>
-              <br>
-
-              <input type="submit" value="Редактировать"/>
-            </form>
-            <form action="@helper.CSRF(routes.Application.deleteTask(editableTask.get.id))" method="post">
-              <input type="submit" value="Удалить"/>
-            </form>
+          Переменная isDef объявляется для краткой записи последующих условий.
+        *@
+        @defining(editableTask.isDefined) { isDef =>
+          @if(isDef) {
+            <form action="@helper.CSRF(routes.HomeController.updateTask(editableTask.get.id))" method="post">
           } else {
-            <form id="editTask">
-              <label>
-                Название:
-                <input class="title" type="text" disabled/>
-              </label>
-
-              <br>
-              <br>
-
-              <div class="left-info">
-                <label>
-                  Описание:
-                  <br>
-                  <textarea rows="10" cols="50" disabled></textarea>
-                </label>
-              </div>
-              <div class="right-info">
-                <p>Состояние:</p>
-                <p><label><input name="state" type="radio" value="TODO" disabled>TODO</label></p>
-                <p><label><input name="state" type="radio" value="In Progress" disabled>In Progress</label></p>
-                <p><label><input name="state" type="radio" value="Done" disabled>Done</label></p>
-              </div>
-
-              <br>
-              <br>
-
-              <input type="submit" value="Редактировать" disabled/>
-            </form>
             <form>
-              <input type="submit" value="Удалить" disabled/>
-            </form>
           }
+            <label>
+              Название:
+              <input name="title"
+                     type="text"
+                     required
+                     value="@{ if (isDef) editableTask.get.title}"
+                     @{ if (!isDef) "disabled" }
+              >
+            </label>
 
+            <br>
+            <br>
+
+            <div class="left-info">
+              <label>
+                Описание:
+                <br>
+                <textarea name="description" rows="10" cols="50" @{ if (!isDef) "disabled" }
+                >@if(isDef) {@editableTask.get.description}</textarea>
+              </label>
+            </div>
+            <div class="right-info">
+              <p>Состояние:</p>
+
+              <p><label><input name="state"
+                               type="radio"
+                               value="TODO"
+                               @{ if ((isDef) && (editableTask.get.state == TaskState.TODO)) "checked" }
+                               @{ if (!isDef) "disabled" }
+              >TODO</label></p>
+              <p><label><input name="state"
+                               type="radio"
+                               value="In Progress"
+                               @{ if ((isDef) && (editableTask.get.state == TaskState.IN_PROGRESS)) "checked" }
+                               @{ if (!isDef) "disabled" }
+              >In Progress</label></p>
+              <p><label><input name="state"
+                               type="radio"
+                               value="Done"
+                               @{ if ((isDef) && (editableTask.get.state == TaskState.DONE)) "checked" }
+                               @{ if (!isDef) "disabled" }
+              >Done</label></p>
+            </div>
+
+            <br>
+            <br>
+
+            <input type="submit" value="Редактировать" @{ if (!isDef) "disabled" }>
+          </form>
+            @if(isDef) {
+              <form action="@helper.CSRF(routes.HomeController.deleteTask(editableTask.get.id))" method="post">
+            } else {
+              <form>
+            }
+                <input type="submit" value="Удалить" @{ if (!isDef) "disabled" } >
+              </form>
+            }
         <br>
         <p><a href="@routes.SearchController.search()">Перейти к полнотекстовому поиску по задачам</a></p>
       </div>
     </div>
 
     <div id="content">
-      <table id="bugsTable">
+      <table id="taskTable">
         @{import TaskState._}
         <caption><h1>СПИСОК ЗАДАЧ</h1></caption>
         <tr>
@@ -132,7 +147,7 @@
             @tasksRow.map { task =>
               <td>
                 @if(task != null) {
-                  <a href="@routes.Application.index(Some(task.id))">
+                  <a href="@routes.HomeController.index(Some(task.id))">
                   @task.title
                   </a>
                 }

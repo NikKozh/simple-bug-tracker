@@ -5,8 +5,8 @@ import org.apache.lucene.document.Document
 import play.api.mvc._
 
 @Singleton
-class SearchController @Inject()(searcher: Search, cc: ControllerComponents) extends AbstractController(cc) {
-  // TODO: возможно, заменить на Option?
+class SearchController @Inject()(searcher: Search, cc: ControllerComponents)
+                                (implicit assetsFinder: AssetsFinder) extends AbstractController(cc) {
   def search(query: String) = Action {
     if (query == "") {
       Ok(views.html.search())

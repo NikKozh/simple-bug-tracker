@@ -1,7 +1,5 @@
 package controllers
 
-// TODO: разобраться с импортами, свести всё воедино
-
 import models.TaskState
 import models.TaskState.TaskState
 import play.api.data.{FormError, Forms}
@@ -13,16 +11,16 @@ object TaskForm {
 
   case class TaskData(title: String, description: String, state: TaskState)
 
-  // TODO: если останется время - досконально разобрать
-  // Адаптированный метод со StackOverflow:
   implicit def taskStateFormat: Formatter[TaskState] = new Formatter[TaskState] {
-    override def bind(key: String, data: Map[String, String]) =
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], models.TaskState.Value] = {
       data.get(key)
         .map(TaskState.withName(_))
         .toRight(Seq(FormError(key, "error.required", Nil)))
+    }
 
-    override def unbind(key: String, value: TaskState) =
+    override def unbind(key: String, value: TaskState): Map[String, String] = {
       Map(key -> value.toString)
+    }
   }
 
   val taskForm: Form[TaskData] = Form {

@@ -1,9 +1,12 @@
-@import org.apache.lucene.document.Document
-@(searchResults: Option[Array[Document]] = None, searchQuery: String = "")
+@* В силу того, что в здесь только одна простейшая форма, отдельного представления формы (и, как следствие,
+   обработки глобальных ошибок и т.п.) в этом шаблоне нет. *@
 
-@main("Simple bug tracker - search") {
+@import org.apache.lucene.document.Document
+@(searchResults: Option[Array[Document]] = None, searchQuery: String = "")(implicit assetsFinder: AssetsFinder)
+
+@main("Simple bug tracker - search", assetsFinder) {
   <h1>Полнотекстовый поиск на основе Apache Lucene</h1>
-  <a href="@routes.Application.index()">Вернуться на главную страницу</a>
+  <a href="@routes.HomeController.index()">Вернуться на главную страницу</a>
   <br>
   <br>
   <form action="@routes.SearchController.search()" method="get">
@@ -23,11 +26,11 @@
       <p><b>Найдено задач:</b> @searchResults.get.length</p>
       <table id="searchResult">
         <tr>
-          <th>Заголовок</th><th>Описание</th><th>Состояние</th>
+          <th style="width: 30%">Заголовок</th><th style="width: 50%">Описание</th><th>Состояние</th>
         </tr>
         @for(doc <- searchResults.get) {
           <tr>
-            <td><a href="@routes.Application.index(Some(doc.get("id").toInt))">@doc.get("title")</a></td>
+            <td><a href="@routes.HomeController.index(Some(doc.get("id").toInt))">@doc.get("title")</a></td>
             <td>@doc.get("description")</td>
             <td>@doc.get("state")</td>
           </tr>

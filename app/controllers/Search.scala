@@ -1,6 +1,9 @@
 package controllers
 
-import models._
+import javax.inject._
+import play.api.inject.ApplicationLifecycle
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration._
 
 import org.apache.lucene.document._
 import org.apache.lucene.index._
@@ -11,54 +14,41 @@ import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.store.RAMDirectory
 import org.apache.lucene.analysis.ru._
 
-import javax.inject._
-import play.api.inject.ApplicationLifecycle
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.concurrent.duration._
+import models._
 
 @Singleton
 case class Search @Inject()(taskService: TaskService, lifecycle: ApplicationLifecycle)
                            (implicit ec: ExecutionContext) {
-  private val directory = new RAMDirectory
+  private val directory = new RAMDirectory()
   private val analyzer = new RussianAnalyzer()
   private val writer = new IndexWriter(directory, new IndexWriterConfig(analyzer))
 
-  // Когда сервер завершит работу, writer закроется
+  // Когда сервер завершит работу, writer закроется:
   lifecycle.addStopHook(() => Future.successful(writer.close()))
 
   // Перехват с помощью JVM runtime нужен для случаев, когда сервер не завершается нормальным путём
-  // (например, в случае ошибки, вылета и т.п.)
-  // Если writer уже закрыт, ничего не произойдёт
+  // (например, в случае ошибки, вылета и т.п.). Если writer уже закрыт, ничего не произойдёт:
   Runtime.getRuntime.addShutdownHook(new Thread() {
     override def run(): Unit = writer.close()
   })
 
-  setFutureIndex()
+  setIndexes()
 
   def search(keyword: String): Array[Document] = {
     val searcher = new IndexSearcher(DirectoryReader.open(directory))
     val queryParser = new QueryParser("description", analyzer)
-    val query = queryParser.parse(keyword)
 
+    val query = queryParser.parse(keyword)
     val hits = searcher.search(query, Int.MaxValue)
     val scoreDoc = hits.scoreDocs
-    println("RESULTS FOUND: " + hits.totalHits)
-    println("SEARCH RESULTS")
 
     val searchResults = scoreDoc.map( docs => {
-      val doc = searcher.doc(docs.doc)
-      println("Task found:")
-      println("Id: " + doc.get("id"))
-      println("Title: " + doc.get("title"))
-      println("Description: " + doc.get("description"))
-      println("State: " + doc.get("state"))
-      doc
+      searcher.doc(docs.doc)
     })
     searchResults
   }
 
-  def setFutureIndex(): Unit = {
-    println("*************START INDEXING")
+  def setIndexes(): Unit = {
     writer.deleteAll()
     val tasks: Future[Seq[Task]] = taskService.getTasks
 
@@ -72,13 +62,9 @@ case class Search @Inject()(taskService: TaskService, lifecycle: ApplicationLife
     }
 
     Await.result(indexingFuture, 10 seconds)
-    println("*************END INDEXING")
   }
 
   private def writeToDoc(task: Task) = Future {
-    println("INDEXING: " + task.id)
-    // TODO: если всё заработает, сделать doc полем класса и просто перезаписывать значение,
-    // чтобы не открывать-закрывать при каждом изменении БД
     val doc = new Document()
 
     val fields: Array[Field] = Array(
@@ -89,11 +75,7 @@ case class Search @Inject()(taskService: TaskService, lifecycle: ApplicationLife
     )
 
     fields.foreach(field => doc.add(field))
-
     writer.addDocument(doc)
-
     writer.commit()
-    // writer.close()
-    println("COMPLETED INDEXING: " + task.id)
   }
 }

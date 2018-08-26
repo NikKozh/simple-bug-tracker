@@ -1,20 +1,22 @@
 package models
 
 import javax.inject.{Inject, Singleton}
-import models.TaskState.TaskState
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.db.slick.DatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import models.TaskState.TaskState
 
 @Singleton
-class TaskRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
+case class TaskRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext) {
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
 
   import dbConfig._
   import profile.api._
 
-  private implicit val stateMapper = MappedColumnType.base[TaskState, String](
+  // Для преобразования типа TaskState в обычный String для БД и обратно:
+  private implicit val taskStateMapper = MappedColumnType.base[TaskState, String](
     e => e.toString,
     s => TaskState.withName(s)
   )
@@ -28,28 +30,21 @@ class TaskRepository @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
   }
   private val tasks = TableQuery[TaskTable]
 
-  // TODO: поменять на более простой вариант, т.к. нам не надо возвращать ID
-  // Пример:  coffees.map(c => (c.name, c.supID, c.price)) += ("Colombian_Decaf", 101, 8.99)
-  // (в случае пропуска значения оно заполняется базой данных, если это AutoInc значение, то всё норм)
-  def create(title: String, description: String, state: TaskState): Future[String] = db.run {
-    // We create a projection of just the name and age columns, since we're not inserting a value for the id column
-    ((tasks.map(t => (t.title, t.description, t.state))
-      // Now define it to return the id, because we want to know what id was generated for the person
-      returning tasks.map(_.id)
-      // And we define a transformation for the returned value, which combines our original parameters with the
-      // returned id
-      into ((restData, id) => Task(id, restData._1, restData._2, restData._3))
-      // And finally, insert the person into the database
-      ) += (title, description, state)).map(_ => "Task successfully added")
-    /*(tasks.map(_ => {})) += Task(1, title, description, state)*/
-  }
-
   def getTaskList: Future[Seq[Task]] = db.run {
     tasks.result
   }
 
-  def getTask(id: Int): Future[Seq[Task]] = db.run {
-    tasks.filter(_.id === id).result
+  def getTask(id: Int): Future[Option[Task]] = db.run {
+    // Т.к. id гарантированно уникален, поэтому сразу возвращается первое (и единственное) вхождение:
+    tasks.filter(_.id === id).result.map{ taskSeq =>
+      taskSeq.find(task => task.id == id)
+    }
+  }
+
+  def createTask(title: String, description: String, state: TaskState): Future[String] = db.run {
+    // Благодаря атрибутам столбца id, указанным в файле "1.sql", а также O.AutoInc,
+    // БД проигнорирует 0 и сама проставит значение:
+    (tasks += Task(0, title, description, state)).map(_ => "")
   }
 
   def deleteTask(id: Int): Future[Int] = db.run {
