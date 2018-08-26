@@ -6,6 +6,7 @@ To use it you need:
   * address: localhost 
   * user: "postgres" 
   * password "1234"
+  * empty database: bugtracker_db
 * sbt run
 
 The server will be on http://localhost:9000 address.
