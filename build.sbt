@@ -18,3 +18,5 @@ libraryDependencies += "org.postgresql" % "postgresql" % "42.2.4"
 libraryDependencies += "org.apache.lucene" % "lucene-core" % "7.4.0"
 libraryDependencies += "org.apache.lucene" % "lucene-analyzers-common" % "7.4.0"
 libraryDependencies += "org.apache.lucene" % "lucene-queryparser" % "7.4.0"
+
+libraryDependencies += "org.postgresql" % "postgresql" % "9.4-1201-jdbc41"
