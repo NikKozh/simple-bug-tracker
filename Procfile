@@ -1,1 +1,1 @@
-web: target/universal/stage/bin/simple-bug-tracker -Dhttp.port=${PORT} -Dplay.evolutions.db.default.autoApply=true -Dslick.dbs.default.driver=org.postgresql.Driver -Dslick.dbs.default.url=${DATABASE_URL}
+web: target/universal/stage/bin/simple-bug-tracker -Dhttp.port=${PORT} -Dplay.evolutions.db.default.autoApply=true -Dconfig.resource=application.conf
