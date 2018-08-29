@@ -2,6 +2,7 @@
 The simpliest bug tracker with adding and deleting tasks. Scala + Play Framework, using PostgreSQL and Slick as ORM. Apache Lucene for full-text search.
 
 The application was deployed on Clever Cloud: http://app-3ec2dec5-6155-4cc1-ac1a-431c4edfb1c0.cleverapps.io/
+
 Note that frontend is made very badly (non-adaptive and even not cross-browser) since I'm not a front-end developer at all and my purpose was to make the good backend.
 
 To use it locally you need:
