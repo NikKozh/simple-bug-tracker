@@ -69,9 +69,8 @@ class TaskService @Inject()(taskRepository: TaskRepository) {
     }
   }
 
-  def createTask(data: TaskData): Future[String] = {
+  def createTask(data: TaskData): Future[Int] =
     taskRepository.createTask(data.title, data.description, data.state)
-  }
 
   def deleteTask(id: Int): Future[Int] = {
     taskRepository.deleteTask(id)

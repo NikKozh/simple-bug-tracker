@@ -41,17 +41,20 @@ case class TaskRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(im
     }
   }
 
-  def createTask(title: String, description: String, state: TaskState): Future[String] = db.run {
+  def createTask(title: String, description: String, state: TaskState): Future[Int] = db.run {
     // Благодаря атрибутам столбца id, указанным в файле "1.sql", а также O.AutoInc,
     // БД проигнорирует 0 и сама проставит значение:
-    (tasks += Task(0, title, description, state)).map(_ => "")
+    ((tasks.map(t => (t.title, t.description, t.state))
+      returning tasks.map(_.id)
+      into ((restData, id) => Task(id, restData._1, restData._2, restData._3))
+     ) += (title, description, state)).map(_.id)
   }
 
   def deleteTask(id: Int): Future[Int] = db.run {
-    tasks.filter(_.id === id).delete
+    tasks.filter(_.id === id).delete.map(_ => id)
   }
 
-  def updateTask(id: Int, newTitle: String, newDescription: String, newState: TaskState): Future[Int] = db.run {
-    tasks.filter(_.id === id).update(Task(id, newTitle, newDescription, newState))
+  def updateTask(task: Task): Future[Int] = db.run {
+    tasks.filter(_.id === task.id).update(task).map(_ => task.id)
   }
 }
