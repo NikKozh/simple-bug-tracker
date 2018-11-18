@@ -64,6 +64,15 @@ case class Search @Inject()(taskService: TaskService, lifecycle: ApplicationLife
     Await.result(indexingFuture, 10 seconds)
   }
 
+   def setIndex(taskId: Int): Unit = {
+     writer.deleteDocuments(new Term("id", taskId.toString))
+
+     for {
+       maybeTask <- taskService.getTask(taskId)
+       task      <- maybeTask
+     } writeToDoc(task)
+   }
+
   private def writeToDoc(task: Task) = Future {
     val doc = new Document()
 

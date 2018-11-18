@@ -16,6 +16,11 @@ class HomeController @Inject()(taskService: TaskService, cc: MessagesControllerC
                               extends MessagesAbstractController(cc) {
 
   def index(id: Option[Int]): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
+  private def indexAndRedirect(taskId: Int): Result = {
+    searcher.setIndex(taskId) // переиндексируем только ту задачу, которая была изменена
+    Redirect(routes.HomeController.index())
+  }
+
     taskService.getTaskMatrixForTemplate.map { matrix =>
       Ok(views.html.index(matrix, taskForm,
         id match {
@@ -27,39 +32,22 @@ class HomeController @Inject()(taskService: TaskService, cc: MessagesControllerC
   }
 
   def createTask(): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
-    // handleSuccessForm не вынесен в отдельный метод, т.к. внутри него для создания и обновления задачи
+    // handleSuccessForm вынесен в отдельный метод только частично, т.к. внутри него для создания и обновления задачи
     // требуются два разных метода с разными возвращаемыми типами, и такой рефакторинг неоправданно усложнил бы код
     val handleSuccessForm = { data: TaskData =>
-      taskService.createTask(data).map { _ =>
-        searcher.setIndexes() // индексируем все задачи заново для полнотекстового поиска
-        Redirect(routes.HomeController.index())
-      }
+      taskService.createTask(data).map(indexAndRedirect)
     }
-
     taskForm.bindFromRequest.fold(handleErrorForm, handleSuccessForm)
   }
 
   def updateTask(id: Int): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
     val handleSuccessForm = { data: TaskData =>
-      taskService.updateTask(id, data).map { _ =>
-        searcher.setIndexes()
-        Redirect(routes.HomeController.index())
-      }
+      taskService.updateTask(id, data).map(indexAndRedirect)
     }
-
     taskForm.bindFromRequest.fold(handleErrorForm, handleSuccessForm)
   }
 
-  private def handleErrorForm(implicit request: MessagesRequest[AnyContent]) = { formWithErrors: Form[TaskData] =>
-    taskService.getTaskMatrixForTemplate.map { matrix =>
-      BadRequest(views.html.index(matrix, formWithErrors))
-    }
-  }
-
   def deleteTask(id: Int): Action[AnyContent] = Action.async {
-    taskService.deleteTask(id).map { _ =>
-      searcher.setIndexes()
-      Redirect(routes.HomeController.index())
-    }
+    taskService.deleteTask(id).map(indexAndRedirect)
   }
 }
