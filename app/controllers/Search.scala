@@ -2,9 +2,8 @@ package controllers
 
 import javax.inject._
 import play.api.inject.ApplicationLifecycle
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.concurrent.duration._
 
+import scala.concurrent.{ExecutionContext, Future}
 import org.apache.lucene.document._
 import org.apache.lucene.index._
 import org.apache.lucene.search._
@@ -47,18 +46,11 @@ case class Search @Inject()(taskService: TaskService, lifecycle: ApplicationLife
 
   def setIndexes(): Unit = {
     writer.deleteAll()
-    val tasks: Future[Seq[Task]] = taskService.getTasks
 
-    def indexingFuture = {
-      val list = Seq {
-        tasks.map(_.foreach( task =>
-          writeToDoc(task)
-        ))
-      }
-      Future.sequence(list)
-    }
-
-    Await.result(indexingFuture, 10 seconds)
+    for {
+      taskSeq <- taskService.getTasks
+      task  <- taskSeq
+    } writeToDoc(task)
   }
 
    def setIndex(taskId: Int): Unit = {

@@ -1,12 +1,10 @@
 package controllers
 
 import javax.inject._
-import scala.concurrent.{Await, ExecutionContext}
-import scala.concurrent.duration._
 
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc._
 import play.api.data.Form
-
 import models._
 import TaskForm._
 
@@ -16,18 +14,23 @@ class HomeController @Inject()(taskService: TaskService, cc: MessagesControllerC
                               extends MessagesAbstractController(cc) {
 
   def index(id: Option[Int]): Action[AnyContent] = Action.async { implicit request: MessagesRequest[AnyContent] =>
+    for {
+      matrix    <- taskService.getTaskMatrixForTemplate
+      maybeTask <- id match {
+        case Some(wantedId) => taskService.getTask(wantedId)
+        case None           => Future(None)
+      }
+    } yield Ok(views.html.index(matrix, maybeTask))
+  }
+
   private def indexAndRedirect(taskId: Int): Result = {
     searcher.setIndex(taskId) // переиндексируем только ту задачу, которая была изменена
     Redirect(routes.HomeController.index())
   }
 
+  private def handleErrorForm(implicit request: MessagesRequest[AnyContent]) = { _: Form[TaskData] =>
     taskService.getTaskMatrixForTemplate.map { matrix =>
-      Ok(views.html.index(matrix, taskForm,
-        id match {
-          case Some(wantedId) => Await.result(taskService.getTask(wantedId), 10 seconds)
-          case None => None
-        }
-      ))
+      BadRequest(views.html.index(matrix))
     }
   }
 
