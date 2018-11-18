@@ -5,18 +5,12 @@
   Экземпляр задачи, которую нужно отредактировать, передаётся отдельно, а не по id. Это сделано для того, чтобы
   обращение к БД и поиск конкретного элемента взял на себя вызывающий код, а не шаблон
 *@
-@(tasksMatrix: List[List[Task]], form: Form[TaskForm.TaskData],
-  editableTask: Option[Task] = None)(implicit request: MessagesRequestHeader, assetsFinder: AssetsFinder)
+@(tasksMatrix: List[List[Task]], editableTask: Option[Task] = None)(implicit request: MessagesRequestHeader,
+                                                                             assetsFinder: AssetsFinder)
 
 @main("Simple bug tracker", assetsFinder) {
 
   <div class="wrapper">
-    @* Глобальные ошибки не привязываются к конкретной форме, поэтому отображаются отдельно здесь: *@
-    @if(form.hasGlobalErrors) {
-      @form.globalErrors.map { error: FormError =>
-        <p>@error.key: @error.message</p>
-      }
-    }
     <div id="sidebar">
       <div class="card">
 
@@ -148,7 +142,7 @@
               <td>
                 @if(task != null) {
                   <a href="@routes.HomeController.index(Some(task.id))">
-                  @task.title
+                    @task.title
                   </a>
                 }
               </td>
