@@ -13,15 +13,14 @@ import org.apache.lucene.document.{Document, Field}
 import org.apache.lucene.index.IndexWriter
 import org.apache.lucene.store.RAMDirectory
 import org.apache.lucene.analysis.ru._
-
 import models._
 
 @Singleton
 case class Search @Inject()(taskService: TaskService, lifecycle: ApplicationLifecycle)
                            (implicit ec: ExecutionContext) {
   private val directory = new RAMDirectory()
-  private val analyzer = new RussianAnalyzer()
-  private val writer = new IndexWriter(directory, new IndexWriterConfig(analyzer))
+  private val analyzer  = new RussianAnalyzer()
+  private val writer    = new IndexWriter(directory, new IndexWriterConfig(analyzer))
 
   // Когда сервер завершит работу, writer закроется:
   lifecycle.addStopHook(() => Future.successful(writer.close()))
@@ -35,16 +34,14 @@ case class Search @Inject()(taskService: TaskService, lifecycle: ApplicationLife
   setIndexes()
 
   def search(keyword: String): Array[Document] = {
-    val searcher = new IndexSearcher(DirectoryReader.open(directory))
+    val searcher    = new IndexSearcher(DirectoryReader.open(directory))
     val queryParser = new QueryParser("description", analyzer)
 
-    val query = queryParser.parse(keyword)
-    val hits = searcher.search(query, Int.MaxValue)
+    val query    = queryParser.parse(keyword)
+    val hits     = searcher.search(query, Int.MaxValue)
     val scoreDoc = hits.scoreDocs
 
-    val searchResults = scoreDoc.map( docs => {
-      searcher.doc(docs.doc)
-    })
+    val searchResults = scoreDoc.map(docs => searcher.doc(docs.doc))
     searchResults
   }
 
@@ -79,7 +76,7 @@ case class Search @Inject()(taskService: TaskService, lifecycle: ApplicationLife
     val fields: Array[Field] = Array(
       new StoredField("id", task.id),
       new StoredField("title", task.title),
-      new TextField("description", task.description, Field.Store.YES),
+      new TextField  ("description", task.description, Field.Store.YES),
       new StoredField("state", task.state.toString)
     )
 

@@ -9,13 +9,11 @@ import models.TaskState._
 
 @Singleton
 class TaskService @Inject()(taskRepository: TaskRepository) {
-  def getTasks: Future[Seq[Task]] = {
+  def getTasks: Future[Seq[Task]] =
     taskRepository.getTaskList
-  }
 
-  def getTask(id: Int)(implicit ec: ExecutionContext): Future[Option[Task]] = {
+  def getTask(id: Int)(implicit ec: ExecutionContext): Future[Option[Task]] =
     taskRepository.getTask(id)
-  }
 
   // Генерирует из списка задач матрицу, полностью совпадающую со структурой таблицы в шаблоне:
   def getTaskMatrixForTemplate()(implicit ec: ExecutionContext): Future[List[List[Task]]] = {
@@ -72,11 +70,9 @@ class TaskService @Inject()(taskRepository: TaskRepository) {
   def createTask(data: TaskData): Future[Int] =
     taskRepository.createTask(data.title, data.description, data.state)
 
-  def deleteTask(id: Int): Future[Int] = {
+  def deleteTask(id: Int): Future[Int] =
     taskRepository.deleteTask(id)
-  }
 
-  def updateTask(id: Int, newData: TaskData): Future[Int] = {
-    taskRepository.updateTask(id, newData.title, newData.description, newData.state)
-  }
+  def updateTask(id: Int, newData: TaskData): Future[Int] =
+    taskRepository.updateTask(Task(id, newData.title, newData.description, newData.state))
 }

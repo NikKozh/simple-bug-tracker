@@ -22,11 +22,11 @@ case class TaskRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(im
   )
 
   private class TaskTable(tag: Tag) extends Table[Task](tag, "tasks") {
-    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
-    def title = column[String]("title")
+    def id          = column[Int]("id", O.PrimaryKey, O.AutoInc)
+    def title       = column[String]("title")
     def description = column[String]("description")
-    def state = column[TaskState]("state")
-    def * = (id, title, description, state) <> ((Task.apply _).tupled, Task.unapply)
+    def state       = column[TaskState]("state")
+    def *           = (id, title, description, state) <> ((Task.apply _).tupled, Task.unapply)
   }
   private val tasks = TableQuery[TaskTable]
 
@@ -34,12 +34,8 @@ case class TaskRepository @Inject()(dbConfigProvider: DatabaseConfigProvider)(im
     tasks.result
   }
 
-  def getTask(id: Int): Future[Option[Task]] = db.run {
-    // Т.к. id гарантированно уникален, поэтому сразу возвращается первое (и единственное) вхождение:
-    tasks.filter(_.id === id).result.map{ taskSeq =>
-      taskSeq.find(task => task.id == id)
-    }
-  }
+  def getTask(id: Int): Future[Option[Task]] =
+    getTaskList.map(_.find(_.id == id))
 
   def createTask(title: String, description: String, state: TaskState): Future[Int] = db.run {
     // Благодаря атрибутам столбца id, указанным в файле "1.sql", а также O.AutoInc,

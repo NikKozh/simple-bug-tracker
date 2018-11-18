@@ -25,9 +25,9 @@ object TaskForm {
 
   val taskForm: Form[TaskData] = Form {
     mapping(
-      "title" -> nonEmptyText,
+      "title"       -> nonEmptyText,
       "description" -> text,
-      "state" -> Forms.of[TaskState]
+      "state"       -> Forms.of[TaskState]
     )(TaskData.apply)(TaskData.unapply)
   }
 }
