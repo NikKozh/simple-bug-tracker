@@ -3,7 +3,7 @@
 GET     /                           controllers.HomeController.index(id: Option[Int] ?= None)
 POST    /                           controllers.HomeController.createTask
 POST    /:id/update                 controllers.HomeController.updateTask(id: Int)
-POST    /:id/delete                 controllers.HomeController.deleteTask(id: Int)
+GET     /:id/delete                 controllers.HomeController.deleteTask(id: Int)
 
 # Здесь используется пустая строка вместо Option[String] ?= None, т.к. она означает отсутствие запроса
 # от пользователя (форма не даст отправить пустой запрос), а значит, не нужно выводить информацию

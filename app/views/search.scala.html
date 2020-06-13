@@ -1,41 +1,41 @@
-@* В силу того, что в здесь только одна простейшая форма, отдельного представления формы (и, как следствие,
-   обработки глобальных ошибок и т.п.) в этом шаблоне нет. *@
-
 @import org.apache.lucene.document.Document
 @(searchResults: Option[Array[Document]] = None, searchQuery: String = "")(implicit assetsFinder: AssetsFinder)
 
 @main("Simple bug tracker - search", assetsFinder) {
-  <h1>Полнотекстовый поиск на основе Apache Lucene</h1>
-  <a href="@routes.HomeController.index()">Вернуться на главную страницу</a>
-  <br>
-  <br>
-  <form action="@routes.SearchController.search()" method="get">
-    <label>Поиск по описанию задачи:
-      <br>
-      <input type="text" name="query" required/>
-      <input type="submit" value="Найти">
-    </label>
-  </form>
-  <br>
-  @if(searchResults.isDefined) {
-    <h2>Результаты поиска</h2>
-    <p><b>Запрос:</b> @searchQuery</p>
-    @if(searchResults.get.isEmpty) {
-      <p>По Вашему запросу ничего не найдено.</p>
-    } else {
-      <p><b>Найдено задач:</b> @searchResults.get.length</p>
-      <table id="searchResult">
-        <tr>
-          <th style="width: 30%">Заголовок</th><th style="width: 50%">Описание</th><th>Состояние</th>
-        </tr>
-        @for(doc <- searchResults.get) {
-          <tr>
-            <td><a href="@routes.HomeController.index(Some(doc.get("id").toInt))">@doc.get("title")</a></td>
-            <td>@doc.get("description")</td>
-            <td>@doc.get("state")</td>
-          </tr>
-        }
-      </table>
+  <div class="search-wrapper l-box">
+    <a href="@routes.HomeController.index()" class="pure-button">Назад</a>
+    <h1>Полнотекстовый поиск по описаниям задач</h1>
+    <form action="@routes.SearchController.search()" method="get" class="pure-form">
+      <label>Поиск по описанию задачи:
+        <input type="text" name="query" required/>
+        <button class="pure-button pure-button-primary" type="submit">Найти</button>
+      </label>
+    </form>
+    <br>
+    @searchResults.map { results =>
+      <h2>Результаты поиска</h2>
+      <p><b>Запрос:</b> @searchQuery</p>
+      @if(results.isEmpty) {
+        <p>По Вашему запросу ничего не найдено.</p>
+      } else {
+        <p><b>Найдено задач:</b> @results.length</p>
+        <table class="pure-table pure-table-bordered tasks-table">
+          <thead>
+            <tr>
+              <th>Заголовок</th>
+              <th>Описание</th>
+              <th>Состояние</th>
+            </tr>
+          </thead>
+          @for(doc <- results) {
+            <tr>
+              <td><a href="@routes.HomeController.index(Some(doc.get("id").toInt))">@doc.get("title")</a></td>
+              <td>@doc.get("description")</td>
+              <td>@doc.get("state")</td>
+            </tr>
+          }
+        </table>
+      }
     }
-  }
+  </div>
 }

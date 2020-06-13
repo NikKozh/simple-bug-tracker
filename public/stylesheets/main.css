@@ -1,53 +1,79 @@
-.wrapper {
-    display: flex;
-}
-
-#content {
-    width: 65%;
-    padding-left: 10px;
-}
-
 .card {
-    border: 2px solid black;
-    height: 370px;
+    border: 1px solid #0e78e7;
+    border-radius: 1em;
     width: 100%;
     margin-bottom: 5px;
+    /* padding: 1em; */
+    padding: 0 1em 1em 1em;
+    box-sizing: border-box;
+}
+
+.search-wrapper {
+    margin: auto;
+    width: 56%;
+}
+
+.l-box {
+    padding: 1em;
+    background-color: #0e78e70f;
+}
+
+.pure-g > div {
+    box-sizing: border-box;
+}
+
+html, button, input, select, textarea, .pure-g [class *= "pure-u"] {
+    font-family: Georgia, Times, "Times New Roman", serif;
+}
+
+.button-delete {
+    color: white;
+    background: rgb(202, 60, 60);
+}
+
+.centered {
+    align-content: center;
     text-align: center;
 }
 
-.card h2 {
-    text-align: center;
+.search-button {
+    text-align: right;
+    align-self: center;
 }
 
-#sidebar {
-    width: 35%;
-}
-
-#taskTable {
-    border: 2px solid black;
-    border-collapse: collapse;
+.w-100 {
     width: 100%;
 }
 
-#taskTable td, #taskTable th {
-    border: 1px solid gray;
-    border-collapse: collapse;
+.tasks-table {
+    width: 100%;
+}
+
+.tasks-table td {
     width: 33%;
 }
 
-#searchResult {
-    border: 1px solid gray;
-    border-collapse: collapse;
-    width: 800px;
+.m-l-auto {
+    margin-left: auto;
 }
 
-#searchResult td, #searchResult th {
-    border: 1px solid gray;
-    border-collapse: collapse;
+.m-r-auto {
+    margin-right: auto;
 }
 
-.left-info {
-    float: left;
-    padding-left: 25px;
-    width: 60%;
+textarea[name=description] {
+    resize: vertical;
+}
+
+.state-wrapper {
+    padding-left: 25%;
+    height: 100%;
+}
+
+.states-block > label {
+    padding-top: 15px;
+}
+
+html, body, .main-wrapper, .l-box {
+    height: 100%;
 }

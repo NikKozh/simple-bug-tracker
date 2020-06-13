@@ -1,6 +1,5 @@
-@import scala.concurrent.Future
-@import scala.concurrent.{ExecutionContext, Await}
-@import scala.concurrent.duration.Duration
+@import TaskState._
+
 @*
   Экземпляр задачи, которую нужно отредактировать, передаётся отдельно, а не по id. Это сделано для того, чтобы
   обращение к БД и поиск конкретного элемента взял на себя вызывающий код, а не шаблон
@@ -8,133 +7,97 @@
 @(tasksMatrix: List[List[Task]], editableTask: Option[Task] = None)(implicit request: MessagesRequestHeader,
                                                                              assetsFinder: AssetsFinder)
 
+@actionUrl = @{
+  editableTask match {
+    case Some(task) => helper.CSRF(routes.HomeController.updateTask(task.id))
+    case None => helper.CSRF(routes.HomeController.createTask())
+  }
+}
+
 @main("Simple bug tracker", assetsFinder) {
-
-  <div class="wrapper">
-    <div id="sidebar">
+  <div class="pure-g main-wrapper">
+    <div class="pure-u-1 pure-u-xl-1-4 l-box m-l-auto">
       <div class="card">
+        <h1>@if(editableTask.isEmpty){ Создать задачу } else { Редактировать задачу }</h1>
 
-        @*
-          Для рендеринга и обработки форм в шаблоне, как правило, пользуются хелпером Twirl.
-          В даннном случае были выбраны обычные HTML-теги из-за их большей гибкости и читаемости.
-          Например, поместить текст по-умолчанию в textarea, который при этом может редактировать юзер,
-          средствами хелпера не удалось (тег value не работает). Т.е. нужно было либо писать свою часть
-          хелпера для textarea, либо пользоваться стандартными тегами.
-        *@
+        <form class="pure-form"
+        action="@actionUrl"
+        method="post"
+        >
+          <label>
+            Название: <input class="w-100" name="title" type="text" value="@{editableTask.map(_.title)}" required/>
+          </label>
 
-        <h2>Создать задачу</h2>
-        <form action="@helper.CSRF(routes.HomeController.createTask())" method="post">
-          <p><label>
-            Название: <input name="title" type="text" required/>
-          </label></p>
-
-          <div class="left-info">
-            <label>
-              Описание:
-              <br>
-              <textarea name="description" rows="10" cols="50"></textarea>
-            </label>
-          </div>
-          <div class="right-info">
-            <p>Состояние:</p>
-            <p><label><input name="state" type="radio" value="TODO" checked>TODO</label></p>
-            <p><label><input name="state" type="radio" value="In Progress">In Progress</label></p>
-            <p><label><input name="state" type="radio" value="Done">Done</label></p>
-          </div>
-
-          <br>
-          <br>
-
-          <p><input type="submit" value="Создать"/></p>
-        </form>
-      </div>
-
-      <div class="card">
-        <h2>Редактировать задачу</h2>
-        @*
-          Структура формы редактирования задачи неизменна, меняется только доступность её элементов и их содержимое.
-          Поэтому в данном случае все теги прописываются только один раз, но содержат условия для прописывания
-          необходимых атрибутов в зависимости от ситуации.
-
-          Переменная isDef объявляется для краткой записи последующих условий.
-        *@
-        @defining(editableTask.isDefined) { isDef =>
-          @if(isDef) {
-            <form action="@helper.CSRF(routes.HomeController.updateTask(editableTask.get.id))" method="post">
-          } else {
-            <form>
-          }
-            <label>
-              Название:
-              <input name="title"
-                     type="text"
-                     required
-                     value="@{ if (isDef) editableTask.get.title}"
-                     @{ if (!isDef) "disabled" }
-              >
-            </label>
-
-            <br>
-            <br>
-
-            <div class="left-info">
+          <div class="pure-g">
+            <div class="pure-u-2-3 pure-form-stacked">
               <label>
                 Описание:
-                <br>
-                <textarea name="description" rows="10" cols="50" @{ if (!isDef) "disabled" }
-                >@if(isDef) {@editableTask.get.description}</textarea>
+                <textarea class="pure-input-1" name="description" rows="5">@{editableTask.map(_.description)}</textarea>
               </label>
             </div>
-            <div class="right-info">
-              <p>Состояние:</p>
-
-              <p><label><input name="state"
-                               type="radio"
-                               value="TODO"
-                               @{ if ((isDef) && (editableTask.get.state == TaskState.TODO)) "checked" }
-                               @{ if (!isDef) "disabled" }
-              >TODO</label></p>
-              <p><label><input name="state"
-                               type="radio"
-                               value="In Progress"
-                               @{ if ((isDef) && (editableTask.get.state == TaskState.IN_PROGRESS)) "checked" }
-                               @{ if (!isDef) "disabled" }
-              >In Progress</label></p>
-              <p><label><input name="state"
-                               type="radio"
-                               value="Done"
-                               @{ if ((isDef) && (editableTask.get.state == TaskState.DONE)) "checked" }
-                               @{ if (!isDef) "disabled" }
-              >Done</label></p>
+            <div class="pure-u-1-3 pure-form-stacked">
+              <div class="state-wrapper">
+                <label>Состояние:</label>
+                <div class="states-block">
+                  <label>
+                    <input name="state"
+                    type="radio"
+                    value="TODO"
+                      @{ if (editableTask.forall(_.state == TODO)) "checked" }
+                    >
+                    TODO
+                  </label>
+                  <label>
+                    <input name="state"
+                    type="radio"
+                    value="In Progress"
+                      @{ if (editableTask.exists(_.state == IN_PROGRESS)) "checked" }
+                    >
+                    In Progress
+                  </label>
+                  <label>
+                    <input name="state"
+                    type="radio"
+                    value="Done"
+                      @{ if (editableTask.exists(_.state == DONE)) "checked" }
+                    >
+                    Done
+                  </label>
+                </div>
+              </div>
             </div>
+          </div>
 
-            <br>
-            <br>
-
-            <input type="submit" value="Редактировать" @{ if (!isDef) "disabled" }>
-          </form>
-            @if(isDef) {
-              <form action="@helper.CSRF(routes.HomeController.deleteTask(editableTask.get.id))" method="post">
-            } else {
-              <form>
+          <div class="centered">
+            <button class="pure-button pure-button-primary" type="submit">Сохранить</button>
+            @editableTask.map { task =>
+              <a href="@routes.HomeController.deleteTask(task.id)" class="button-delete pure-button">Удалить</a>
+              <a href="@routes.HomeController.index()" class="pure-button">Отмена</a>
             }
-                <input type="submit" value="Удалить" @{ if (!isDef) "disabled" } >
-              </form>
-            }
-        <br>
-        <p><a href="@routes.SearchController.search()">Перейти к полнотекстовому поиску по задачам</a></p>
+          </div>
+        </form>
       </div>
     </div>
 
-    <div id="content">
-      <table id="taskTable">
-        @{import TaskState._}
-        <caption><h1>СПИСОК ЗАДАЧ</h1></caption>
-        <tr>
+    <div class="pure-u-1 pure-u-xl-1-3 l-box m-r-auto">
+      <div class="pure-g">
+        <div class="pure-u-3-4">
+          <h1>Список задач</h1>
+        </div>
+        <div class="pure-u-1-4 search-button">
+          <a href="@routes.SearchController.search()" class="pure-button pure-button-primary">
+            Поиск по задачам
+          </a>
+        </div>
+      </div>
+      <table class="pure-table pure-table-bordered tasks-table">
+        <thead>
+          <tr>
           @for(state <- TaskState.values) {
             <th>@state.toString</th>
           }
-        </tr>
+          </tr>
+        </thead>
 
         @tasksMatrix.map { tasksRow =>
           <tr>
@@ -142,16 +105,14 @@
               <td>
                 @if(task != null) {
                   <a href="@routes.HomeController.index(Some(task.id))">
-                    @task.title
+                  @task.title
                   </a>
                 }
               </td>
             }
           </tr>
-          }
+        }
       </table>
     </div>
-
   </div>
-
 }
